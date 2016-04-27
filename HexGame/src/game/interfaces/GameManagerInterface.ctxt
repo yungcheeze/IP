@@ -1,0 +1,11 @@
+#BlueJ class context
+comment0.params=player\ colour
+comment0.target=boolean\ specifyPlayer(PlayerInterface,\ Piece)
+comment0.text=\n\ Define\ who\ will\ be\ playing\ each\ colour.\ This\ method\ will\ be\ called\ twice\ for\ each\ game\ once\ for\n\ RED\ and\ once\ for\ BLUE.\n\ \n\ @param\ \ player\ \ \ \ \ the\ player\ who\ will\ be\ playing\ red\n\ @param\ \ colour\ \ \ \ \ the\ enum\ for\ a\ Piece\ (RED\ or\ BLUE)\n\ @return\ boolean\ \ \ \ true\ if\ the\ player\ was\ successfully\ set\ to\ the\ specified\ colour\n\ \n\ @throws\ ColourAlreadySetException\ \ If\ the\ colour\ is\ alredy\ allocated\ to\ a\ player\n
+comment1.params=sizeX\ sizeY
+comment1.target=boolean\ boardSize(int,\ int)
+comment1.text=\n\ Specifiy\ the\ size\ of\ the\ board\ that\ we\ are\ playing\ on.\ Both\ numbers\ must\ be\ greater\ than\ zero\n\ \n\ @param\ \ sizeX\ \ \ \ \ \ how\ wide\ the\ board\ will\ be\n\ @param\ \ sizeY\ \ \ \ \ \ how\ tall\ the\ board\ will\ be\n\ @returns\ boolean\ \ \ true\ if\ the\ board\ could\ be\ set\ successfully\n\ \n\ @throws\ InvalidBoardSizeException\ \ If\ either\ size\ value\ is\ less\ than\ one.\n\ @throws\ BoardAlreadySizedException\ If\ the\ board\ has\ already\ been\ created.\n
+comment2.params=
+comment2.target=boolean\ playGame()
+comment2.text=\n\ The\ core\ of\ the\ game\ manager.\ This\ requests\ each\ player\ to\ make\ a\ move\ and\ plays\ these\ out\ on\ the\ \n\ game\ board.\n
+numComments=3

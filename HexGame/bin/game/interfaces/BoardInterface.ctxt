@@ -1,0 +1,14 @@
+#BlueJ class context
+comment0.params=sizeX\ sizeY
+comment0.target=boolean\ setBoardSize(int,\ int)
+comment0.text=\n\ Specifiy\ the\ size\ of\ the\ board\ that\ we\ are\ playing\ on.\ Both\ numbers\ must\ be\ greater\ than\ zero\n\ \n\ @param\ \ sizeX\ \ \ \ \ \ how\ wide\ the\ board\ will\ be\n\ @param\ \ sizeY\ \ \ \ \ \ how\ tall\ the\ board\ will\ be\n\ @returns\ boolean\ \ \ true\ if\ the\ board\ could\ be\ set\ successfully\n\ \n\ @throws\ InvalidBoardSizeException\ \ If\ either\ size\ value\ is\ less\ than\ one.\n\ @throws\ BoardAlreadySizedException\ If\ the\ board\ has\ already\ been\ created.\n
+comment1.params=
+comment1.target=Piece[][]\ getBoardView()
+comment1.text=\n\ This\ method\ will\ return\ a\ two\ dimentional\ array\ of\ Pieces\ which\ represents\ the\ current\ state\ of\ the\ \n\ board.\ As\ this\ is\ just\ a\ copy\ of\ the\ data\ it\ is\ safe\ to\ send\ to\ a\ Player.\n\ \n\ @returns\ Piece[][]\ \ a\ two\ dimentional\ representation\ of\ the\ game\ board.\n\ \n\ @throws\ \ NoBoardDefinedException\ \ \ Thrown\ when\ a\ call\ is\ made\ to\ this\ method\ before\ the\ boardSize\ \n\ method.\n
+comment2.params=colour\ move
+comment2.target=boolean\ placePiece(Piece,\ MoveInterface)
+comment2.text=\n\ Places\ a\ piece\ on\ the\ board\ at\ the\ specified\ location.\n\ \n\ @param\ colour\ \ \ \ \ the\ colour\ of\ the\ piece\ to\ place\ (RED\ or\ BLUE)\n\ @param\ move\ \ \ \ \ \ \ the\ position\ where\ you\ wish\ to\ place\ a\ piece\n\ @return\ boolean\ \ \ true\ if\ the\ piece\ was\ placed\ successfully\n\ \n\ @throws\ PositionAlreadyTakenException\ \ \ if\ there\ is\ already\ a\ Piece\ in\ this\ position\n\ @throws\ InvalidPositionException\ \ \ \ \ \ \ \ if\ the\ specified\ position\ is\ invalid\ -\ e.g.\ (-1,\ -1)\n\ @throws\ InvalidColourException\ \ \ \ \ \ \ \ \ \ if\ the\ colour\ being\ set\ is\ invalid.\ E.g.\ if\ you\ try\ to\ place\ two\ BLUE\ pieces\ one\ after\ the\ other\n
+comment3.params=
+comment3.target=Piece\ gameWon()
+comment3.text=\n\ Checks\ to\ see\ if\ either\ player\ has\ won.\n\ \n\ @return\ Piece\ \ \ RED\ if\ red\ has\ won,\ BLUE\ if\ blue\ has\ won,\ UNSET\ if\ neither\ player\ has\ won.\n\ \n\ @throws\ NoBoardDefinedException\ \ Indicates\ that\ this\ method\ has\ been\ called\ before\ the\ boardSize\ \n\ method\n
+numComments=4
