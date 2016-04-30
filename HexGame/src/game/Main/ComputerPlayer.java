@@ -3,6 +3,7 @@ package game.Main;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,7 +29,7 @@ public class ComputerPlayer implements PlayerInterface {
 	private Piece colour;
 	private GameState gameState;
 	private ComputerBoardGraph boardGraph;
-	private Set<ComputerVertex> mainPath;
+	private LinkedList<ComputerVertex> mainPath;
 	private ComputerVertex head;
 	private ComputerVertex tail;
 	private boolean movingForwards;
@@ -58,7 +59,7 @@ public class ComputerPlayer implements PlayerInterface {
 		firstMove = true;
 		movingForwards = true;
 		movingBackwards = true;
-		mainPath = new HashSet<ComputerVertex>();
+		mainPath = new LinkedList<ComputerVertex>();
 		boardGraph = new ComputerBoardGraph();
 		gameState = GameState.INCOMPLETE;
 	}
@@ -72,7 +73,11 @@ public class ComputerPlayer implements PlayerInterface {
 		System.out.println("***" + colour + " to play***");
 		
 		Move move = new Move();
-
+		
+		ComputerVertex leadingVertex = head;
+		if(playingDirection.equals(Direction.BACKWARDS))
+			leadingVertex = tail;
+		
 		try {
 			// first move
 			if (firstMove) {
@@ -92,8 +97,10 @@ public class ComputerPlayer implements PlayerInterface {
 				if (!boardGraph.isTaken(position)) {
 					move.setPosition(xmid, ymid);
 					displayMoveDecision(move);
-					head = boardGraph.getVertex(position);
-					tail = boardGraph.getVertex(position);
+					leadingVertex = boardGraph.getVertex(position);
+					head = leadingVertex;
+					tail = leadingVertex;
+					mainPath.add(leadingVertex);
 					return move; // MOVE MADE
 				}
 
@@ -106,9 +113,10 @@ public class ComputerPlayer implements PlayerInterface {
 					ComputerVertex v = (ComputerVertex) hops.toArray()[0];
 					int x = v.getPosition().getXPos();
 					int y = v.getPosition().getYPos();
-					head = boardGraph.getVertex(position);
-					tail = boardGraph.getVertex(position);
-					move.setPosition(x, y);
+					leadingVertex = boardGraph.getVertex(position);
+					head = leadingVertex;
+					tail = leadingVertex;
+					mainPath.add(leadingVertex);
 					displayMoveDecision(move);
 					return move; // MOVE MADE
 				} catch (EmptySetException e) {
@@ -160,8 +168,6 @@ public class ComputerPlayer implements PlayerInterface {
 					move.setPosition(x, y);
 					ComputerVertex bh = freeBridge.getBackwardHop();
 					ComputerVertex fh = freeBridge.getForwardHop();
-					bh.setLink(Direction.FORWARDS, linkToUse);
-					fh.setLink(Direction.BACKWARDS, linkToUse);
 					displayMoveDecision(move);
 					return move; // gap filled (MOVE MADE)
 				} catch (EmptySetException e) {
@@ -199,8 +205,6 @@ public class ComputerPlayer implements PlayerInterface {
 				move.setPosition(x, y);
 				ComputerVertex bh = compromisedBridge.getBackwardHop();
 				ComputerVertex fh = compromisedBridge.getForwardHop();
-				bh.setLink(Direction.FORWARDS, linkToSave);
-				fh.setLink(Direction.BACKWARDS, linkToSave);
 				displayMoveDecision(move);
 				return move; // save compromised hop (MOVE MADE)
 				
@@ -212,16 +216,15 @@ public class ComputerPlayer implements PlayerInterface {
 
 			
 			
-			ComputerVertex leadingVertex = head;
-			if(playingDirection.equals(Direction.BACKWARDS))
-				leadingVertex = tail;
+			
 			
 			// check for hop in current direction with free links
 			Set<ComputerVertex> freeHops = new HashSet<ComputerVertex>();
 			try {
 				freeHops = getFreeHops(leadingVertex.getPosition(), playingDirection);
 				ComputerVertex mostForwardHop = mostForwardVertex(freeHops);
-				leadingVertex.setHop(playingDirection, mostForwardHop);
+				//TODO add to linked list instead
+				//leadingVertex.setHop(playingDirection, mostForwardHop);
 				leadingVertex = mostForwardHop;
 				updateLeadingVertex(mostForwardHop);
 				Position position = mostForwardHop.getPosition();
@@ -307,16 +310,20 @@ public class ComputerPlayer implements PlayerInterface {
 	{
 		if(playingDirection.equals(Direction.FORWARDS))
 		{
-			head.setHop(playingDirection, leadingVertex);
-			leadingVertex.setHop(playingDirection.otherDirection(), head);
+			mainPath.addLast(leadingVertex);
 			head = leadingVertex;
 		}
 		else
 		{
-			tail.setHop(playingDirection, leadingVertex);
-			leadingVertex.setHop(playingDirection.otherDirection(), tail);
+			mainPath.addFirst(leadingVertex);
 			tail = leadingVertex;
 		}
+	}
+	
+	//TODO hasHop method
+	private boolean hasHop(ComputerVertex v, Direction d)
+	{
+		if (d.equals(Direction.FORWARDS))
 	}
 	
 	//TODO add changeDirection Method
@@ -443,37 +450,38 @@ public class ComputerPlayer implements PlayerInterface {
 		return mostForward;
 	}
 
-	private boolean pathBroken() {
-		return !endOfPath(tail, Direction.FORWARDS).equals(head);
-	}
-
+//	private boolean pathBroken() {
+//		return !endOfPath(tail, Direction.FORWARDS).equals(head);
+//	}
+	//TODO replace recursive function with linkedList implementation 
 	// from tail to head, returns head
-	public ComputerVertex endOfPath(ComputerVertex start, Direction d) {
-
-		if (start.hasHop(d)) {
-			ComputerVertex forwardHop = (ComputerVertex) start.getHop(d);
-			return endOfPath(forwardHop, d);
-		} else
-			return start;
-	}
-
-	public int pathLength(ComputerVertex start, Direction d) {
-		ComputerVertex current = start;
-		int length = 0;
-		while (current.hasHop(d)) {
-			current = (ComputerVertex) current.getHop(d);
-			length++;
-		}
-		return length;
-	}
+//	public ComputerVertex endOfPath(ComputerVertex start, Direction d) {
+//
+//		if (start.hasHop(d)) {
+//			ComputerVertex forwardHop = (ComputerVertex) start.getHop(d);
+//			return endOfPath(forwardHop, d);
+//		} else
+//			return start;
+//	}
+//
+//	public int pathLength(ComputerVertex start, Direction d) {
+//		ComputerVertex current = start;
+//		int length = 0;
+//		while (current.hasHop(d)) {
+//			current = (ComputerVertex) current.getHop(d);
+//			length++;
+//		}
+//		return length;
+//	}
 
 	// modified pathTraversal() if links between start and hop contain one
 	// opponent colour and other unset, then return unset;
+	//TODO make iterative instead of recursive
 	public Bridge findCompromisedBridge(ComputerVertex start) throws EmptySetException {
 		Direction d = Direction.FORWARDS;
-
-		if (start.hasHop(d)) {
-			ComputerVertex forwardHop = (ComputerVertex) start.getHop(d);
+		//TODO Replace with linked list implementation
+		if (start.hasHop(d)) { //has next element on linked list
+			ComputerVertex forwardHop = (ComputerVertex) start.getHop(d); //= next element on linked list
 			Set<ComputerVertex> links = boardGraph.getLinks(start, forwardHop);
 			HashMap<Piece, ComputerVertex> colourMap = new HashMap<Piece, ComputerVertex>();
 
@@ -499,10 +507,12 @@ public class ComputerPlayer implements PlayerInterface {
 
 	}
 	
+	//TODO make iterative instead of recursive
 	private Bridge findFreeBridge(ComputerVertex start) throws EmptySetException
 	{
 		Direction d = Direction.FORWARDS;
-		if (start.hasHop(d)) {
+		//TODO Replace with linked list implementation
+		if (start.hasHop(d)) { //has next element on linked list (put hasHop(vertex, direction)
 			ComputerVertex forwardHop = (ComputerVertex) start.getHop(d);
 			Set<ComputerVertex> links = boardGraph.getLinks(start, forwardHop);
 			
