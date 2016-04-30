@@ -156,6 +156,28 @@ public class ComputerPlayer implements PlayerInterface {
 			// N.B if complete, start filling gaps (head is end, tail
 			// is
 			// home)(!movingForwards && !movingBackards)
+			
+			// check if hops in path compromised
+			// modified pathTraversal() if links between start and hop contain
+			// one
+			// opponent colour and other unset, then return unset;
+			Bridge compromisedBridge;
+			try {
+				compromisedBridge = findCompromisedBridge();
+				ComputerVertex linkToSave = compromisedBridge.getCompromisedLink();
+				int x = linkToSave.getPosition().getXPos();
+				int y = linkToSave.getPosition().getYPos();
+				move.setPosition(x, y);
+				displayMoveDecision(move);
+				return move; // save compromised hop (MOVE MADE)
+				
+			} catch (EmptySetException e1) {
+				// thrown from findCompromisedBridge
+				//if caught then no compromised bridge found therefore proceed to check for free hops
+//				e1.printStackTrace();
+			}
+
+			
 			// complete path, select a gap to fill (MOVE MADE)
 			if(!movingForwards && !movingBackwards)
 			{
@@ -190,25 +212,6 @@ public class ComputerPlayer implements PlayerInterface {
 //				}
 //			}
 
-			// check if hops in path compromised
-			// modified pathTraversal() if links between start and hop contain
-			// one
-			// opponent colour and other unset, then return unset;
-			Bridge compromisedBridge;
-			try {
-				compromisedBridge = findCompromisedBridge();
-				ComputerVertex linkToSave = compromisedBridge.getCompromisedLink();
-				int x = linkToSave.getPosition().getXPos();
-				int y = linkToSave.getPosition().getYPos();
-				move.setPosition(x, y);
-				displayMoveDecision(move);
-				return move; // save compromised hop (MOVE MADE)
-				
-			} catch (EmptySetException e1) {
-				// thrown from findCompromisedBridge
-				//if caught then no compromised bridge found therefore proceed to check for free hops
-//				e1.printStackTrace();
-			}
 
 			
 			
@@ -550,32 +553,39 @@ public class ComputerPlayer implements PlayerInterface {
 	//TODO make iterative instead of recursive
 	private Bridge findFreeBridge(ComputerVertex start) throws EmptySetException
 	{
-		Direction d = Direction.FORWARDS;
-		//TODO Replace with linked list implementation
-		if (start.hasHop(d)) { //has next element on linked list (put hasHop(vertex, direction)
-			ComputerVertex forwardHop = (ComputerVertex) start.getHop(d);
-			Set<ComputerVertex> links = boardGraph.getLinks(start, forwardHop);
-			
-			HashMap<Piece, ComputerVertex> colourMap = new HashMap<Piece, ComputerVertex>();
-
-			for (ComputerVertex link : links) {
-				Piece colour = link.getColour();
-				colourMap.put(colour, link);
+		boolean found = false;
+		int maxIndex = mainPath.size()-1;
+		int i = 0;
+		while(i < maxIndex && !found)
+		{
+			ComputerVertex current = mainPath.get(i);
+			boolean hasHop = hasNextHop(current, Direction.FORWARDS);
+			if(hasHop)
+			{
+				ComputerVertex next = mainPath.get(i+1);
+				Set<ComputerVertex> linkSet = boardGraph.getLinks(current, next);
+				Map<Piece, ComputerVertex> colourMap = new HashMap<Piece, ComputerVertex>();
+				for (ComputerVertex link: linkSet)
+				{
+					Piece c = link.getColour();
+					colourMap.put(c, link);
+				}
+				
+				boolean noRED = !colourMap.containsKey(Piece.RED);
+				boolean noBlue = !colourMap.containsKey(Piece.BLUE);
+				if(noRED && noBlue)
+				{
+					Bridge compromisedBridge = new Bridge();
+					compromisedBridge.setHops(current, next);
+					compromisedBridge.setLinks(linkSet);
+					ComputerVertex saveableLink = colourMap.get(Piece.UNSET);
+					compromisedBridge.setSaveableLink(saveableLink);
+					return compromisedBridge;
+				}	
 			}
-			
-			if (!colourMap.containsKey(Piece.RED) && !colourMap.containsKey(Piece.BLUE)) {
-				Bridge bridge = new Bridge();
-				bridge.setBackwardHop(start);
-				bridge.setForwardHop(forwardHop);
-				bridge.setLinks(links);
-				bridge.setCompromisedLink(colourMap.get(Piece.UNSET));
-				return bridge;
-			}
-			else 
-				return findFreeBridge(forwardHop);	
 		}
-		else
-			throw new EmptySetException();
+		
+		throw new EmptySetException();
 	}
 
 	private Piece opponentsColour() {
