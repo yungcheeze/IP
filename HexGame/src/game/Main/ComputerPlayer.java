@@ -521,10 +521,29 @@ public class ComputerPlayer implements PlayerInterface {
 			{
 				ComputerVertex next = mainPath.get(i+1);
 				Set<ComputerVertex> linkSet = boardGraph.getLinks(current, next);
-				ArrayList<ComputerVertex> links = new ArrayList<ComputerVertex>(linkSet);
-				Bridge
+				Map<Piece, ComputerVertex> colourMap = new HashMap<Piece, ComputerVertex>();
+				for (ComputerVertex link: linkSet)
+				{
+					Piece c = link.getColour();
+					colourMap.put(c, link);
+				}
+				
+				Piece opponent = opponentsColour();
+				boolean oneFree = colourMap.containsKey(Piece.UNSET);
+				boolean oneTaken = colourMap.containsKey(opponent);
+				if(oneFree && oneTaken)
+				{
+					Bridge compromisedBridge = new Bridge();
+					compromisedBridge.setHops(current, next);
+					compromisedBridge.setLinks(linkSet);
+					ComputerVertex saveableLink = colourMap.get(Piece.UNSET);
+					compromisedBridge.setSaveableLink(saveableLink);
+					return compromisedBridge;
+				}	
 			}
 		}
+		
+		throw new EmptySetException();
 
 	}
 	

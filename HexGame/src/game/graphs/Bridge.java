@@ -11,7 +11,7 @@ public class Bridge {
 	private ComputerVertex trailingHop; //further back hop in direction of travel
 	private ComputerVertex link1;
 	private ComputerVertex link2;
-	private ComputerVertex compromisedlink;
+	private ComputerVertex saveablelink;
 
 	public Bridge() {
 
@@ -24,9 +24,9 @@ public class Bridge {
 		return hops;
 	}
 
-	public void setHops(ComputerVertex v1, ComputerVertex v2) {
-		leadingHop = v1;
-		trailingHop = v2;
+	public void setHops(ComputerVertex trailing, ComputerVertex leading) {
+		trailingHop = leading;
+		leadingHop = leading;
 	}
 	
 	public void setLeadingHop(ComputerVertex v)
@@ -73,14 +73,14 @@ public class Bridge {
 		else return false;
 	}
 	
-	public void setCompromisedLink(ComputerVertex link)
+	public void setSaveableLink(ComputerVertex link)
 	{
-		compromisedlink = link;
+		saveablelink = link;
 	}
 	
-	public ComputerVertex getCompromisedLink()
+	public ComputerVertex getSaveableLink()
 	{
-		return compromisedlink;
+		return saveablelink;
 	}
 
 }
