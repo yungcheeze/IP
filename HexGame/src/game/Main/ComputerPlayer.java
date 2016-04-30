@@ -184,7 +184,7 @@ public class ComputerPlayer implements PlayerInterface {
 				Bridge freeBridge;
 				try {
 					freeBridge = findFreeBridge(tail);
-					ComputerVertex linkToUse = freeBridge.getCompromisedLink();
+					ComputerVertex linkToUse = freeBridge.getSaveableLink();
 					int x = linkToUse.getPosition().getXPos();
 					int y = linkToUse.getPosition().getYPos();
 					move.setPosition(x, y);
@@ -231,7 +231,7 @@ public class ComputerPlayer implements PlayerInterface {
 				int y = position.getYPos();
 				move.setPosition(x, y);
 				displayMoveDecision(move);
-				playingDirection = playingDirection.otherDirection(); // switch directions
+				changeDirection(); // switch directions
 				return move; // place piece (MOVE MADE)
 			} catch (EmptySetException e) {
 				//thrown by getfreeHops()
@@ -251,7 +251,7 @@ public class ComputerPlayer implements PlayerInterface {
 				int y = mostForward.getPosition().getYPos();
 				move.setPosition(x, y);
 				displayMoveDecision(move);
-				playingDirection = playingDirection.otherDirection();
+				changeDirection();
 				return move; // place piece (MOVE MADE)
 			} catch (EmptySetException e) {
 				//thrown by getfreeNeighbours
@@ -358,25 +358,16 @@ public class ComputerPlayer implements PlayerInterface {
 					
 	}
 	
+
 	
+	private boolean changeDirection()
+	{
+		if (playingDirection.equals(Direction.FORWARDS) && movingBackwards)
+			playingDirection = playingDirection.otherDirection();
+		else if (playingDirection.equals(Direction.BACKWARDS) && movingForwards))
+			playingDirection = playingDirection.otherDirection();
+	}
 	
-	//TODO add changeDirection Method
-	//if notMoving forwards and d = backwards
-		//no change
-	//if notMoving backwards and d = forwards
-		//no change
-	
-	//if movingBackwards and d == forwards
-		//change
-	//if movingForwards and d== backwards
-		//change
-	
-	//if d == forwards
-		//if movingBackwards
-			//change
-	//if d == backwards
-		//if movingforwards
-			//change
 		
 
 	private Set<ComputerVertex> getAllHops(Position position, Direction direction) throws EmptySetException {
@@ -575,12 +566,12 @@ public class ComputerPlayer implements PlayerInterface {
 				boolean noBlue = !colourMap.containsKey(Piece.BLUE);
 				if(noRED && noBlue)
 				{
-					Bridge compromisedBridge = new Bridge();
-					compromisedBridge.setHops(current, next);
-					compromisedBridge.setLinks(linkSet);
+					Bridge freeBridge = new Bridge();
+					freeBridge.setHops(current, next);
+					freeBridge.setLinks(linkSet);
 					ComputerVertex saveableLink = colourMap.get(Piece.UNSET);
-					compromisedBridge.setSaveableLink(saveableLink);
-					return compromisedBridge;
+					freeBridge.setSaveableLink(saveableLink);
+					return freeBridge;
 				}	
 			}
 		}
