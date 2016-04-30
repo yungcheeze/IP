@@ -173,7 +173,7 @@ public class ComputerPlayer implements PlayerInterface {
 				displayMoveDecision(move);
 				return move; // save compromised hop (MOVE MADE)
 				
-			} catch (EmptySetException e1) {
+			}  catch (NoBridgeFoundException e) {
 				// thrown from findCompromisedBridge
 				//if caught then no compromised bridge found therefore proceed to check for free hops
 //				e1.printStackTrace();
@@ -192,7 +192,7 @@ public class ComputerPlayer implements PlayerInterface {
 					move.setPosition(x, y);
 					displayMoveDecision(move);
 					return move; // gap filled (MOVE MADE)
-				} catch (EmptySetException e) {
+				}  catch (NoBridgeFoundException e) {
 					//thrown by findFreeBridge
 					//proceed to find random vertex
 //					e.printStackTrace();
@@ -201,7 +201,7 @@ public class ComputerPlayer implements PlayerInterface {
 			}
 			// see if you can add to main path via existing vertices only add if
 			// integrity of potential path is good (has viable hops)
-			// TODO
+			// TODO gamble method
 			// check forwards
 //			if (movingForwards) {
 //				Position position = head.getPosition();
@@ -518,21 +518,29 @@ public class ComputerPlayer implements PlayerInterface {
 		boolean nextIsLink = hasNext(start, d);
 		boolean nextIsHop = hasNextHop(start, d);
 		boolean endReached = !(nextIsLink || nextIsHop);
-		 if(nextIsLink) //recursive case 1
+		if (nextIsLink) // recursive case 1
 		{
 			ComputerVertex next = mainPath.get(nextIndex);
 			return endOfPath(next, d);
-		}
-		else if(nextIsHop) //recursive case 2
+		} 
+		else if (nextIsHop) // recursive case 2
 		{
 			ComputerVertex next = mainPath.get(nextIndex);
+			Bridge bridge;
+			try {
+				bridge = buildBridge(start, next);
+				BridgeState state = bridge.getBridgeState(colour);
+				if (!state.equals(BridgeState.LOST))
+					return endOfPath(next, d);
+				else
+					return start;
+			} catch (NoBridgeFoundException e) {
+				return start;
+			}
 			
-			return endOfPath(next, d);
-		}
-		else //base case
-		{
+		} 
+		else
 			return start;
-		}
 	}
 
 	public int pathLength(ComputerVertex start, Direction d) {
@@ -546,16 +554,28 @@ public class ComputerPlayer implements PlayerInterface {
 		
 		int length = 0;
 		while (hasNext) {
-			current = mainPath.get(nextIndex);
-			hasNext = hasNext(current, d) || hasNextHop(current, d);
+			boolean nextIsLink = hasNext(start, d);
+			boolean nextIsHop = hasNextHop(start, d);
+			ComputerVertex next = mainPath.get(nextIndex);
+			if (nextIsLink)
+				hasNext = true;
+			else if (nextIsHop) {
+				Bridge bridge;
+				try {
+					bridge = buildBridge(current, next);
+					BridgeState state = bridge.getBridgeState(colour);
+					if (!state.equals(BridgeState.LOST))
+						hasNext = false;
+				} catch (NoBridgeFoundException e) {
+					hasNext = false;
+				}
+			}
+			current = next;
 			length++;
 		}
 		return length;
 	}
 
-	// modified pathTraversal() if links between start and hop contain one
-	// opponent colour and other unset, then return unset;
-	//TODO make iterative instead of recursive
 	public Bridge findCompromisedBridge() throws NoBridgeFoundException {
 		
 		boolean found = false;
@@ -581,7 +601,6 @@ public class ComputerPlayer implements PlayerInterface {
 
 	}
 	
-	//TODO make iterative instead of recursive
 	private Bridge findFreeBridge(ComputerVertex start) throws NoBridgeFoundException
 	{
 		boolean found = false;
