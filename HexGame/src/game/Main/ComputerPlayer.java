@@ -23,6 +23,7 @@ import game.interfaces.PlayerInterface;
 import game.graphs.BridgeState;
 import game.graphs.ComputerVertex;
 import game.graphs.EmptySetException;
+import game.graphs.NoBridgeFoundException;
 import game.graphs.Position;
 import game.graphs.PositionType;;
 
@@ -514,14 +515,23 @@ public class ComputerPlayer implements PlayerInterface {
 		if(d.equals(Direction.BACKWARDS))
 			nextIndex = startIndex - 1;
 		
-		boolean hasNext = hasNext(start, d) || hasNextHop(start, d);
-		if (!hasNext) { //base case
-			return start;
-		} else //recursive case
+		boolean nextIsLink = hasNext(start, d);
+		boolean nextIsHop = hasNextHop(start, d);
+		boolean endReached = !(nextIsLink || nextIsHop);
+		 if(nextIsLink) //recursive case 1
 		{
 			ComputerVertex next = mainPath.get(nextIndex);
 			return endOfPath(next, d);
+		}
+		else if(nextIsHop) //recursive case 2
+		{
+			ComputerVertex next = mainPath.get(nextIndex);
 			
+			return endOfPath(next, d);
+		}
+		else //base case
+		{
+			return start;
 		}
 	}
 
@@ -546,60 +556,82 @@ public class ComputerPlayer implements PlayerInterface {
 	// modified pathTraversal() if links between start and hop contain one
 	// opponent colour and other unset, then return unset;
 	//TODO make iterative instead of recursive
-	public Bridge findCompromisedBridge() throws EmptySetException {
+	public Bridge findCompromisedBridge() throws NoBridgeFoundException {
 		
-		boolean found = false;
-		int maxIndex = mainPath.size()-1;
-		int i = 0;
-		while(i < maxIndex && !found)
-		{
-			ComputerVertex current = mainPath.get(i);
-			boolean hasHop = hasNextHop(current, Direction.FORWARDS);
-			if(hasHop)
+		try {
+			boolean found = false;
+			int maxIndex = mainPath.size()-1;
+			int i = 0;
+			while(i < maxIndex && !found)
 			{
-				ComputerVertex next = mainPath.get(i+1);
-				Set<ComputerVertex> linkSet = boardGraph.getLinks(current, next);
+				ComputerVertex current = mainPath.get(i);
+				boolean hasHop = hasNextHop(current, Direction.FORWARDS);
+				if(hasHop)
+				{
+					ComputerVertex next = mainPath.get(i+1);
+					Set<ComputerVertex> linkSet = boardGraph.getLinks(current, next);
 
-				Bridge compromisedBridge = new Bridge();
-				compromisedBridge.setHops(current, next);
-				compromisedBridge.setLinks(linkSet);
-				BridgeState state = compromisedBridge.getBridgeState(colour);
-				if(state.equals(BridgeState.FREE))
-					return compromisedBridge;
-				
+					Bridge compromisedBridge = new Bridge();
+					compromisedBridge.setHops(current, next);
+					compromisedBridge.setLinks(linkSet);
+					BridgeState state = compromisedBridge.getBridgeState(colour);
+					if(state.equals(BridgeState.FREE))
+						return compromisedBridge;
+					
+				}
 			}
+		} catch (EmptySetException e) {
+			throw new NoBridgeFoundException();
 		}
 		
-		throw new EmptySetException();
+		throw new NoBridgeFoundException();
 
 	}
 	
 	//TODO make iterative instead of recursive
-	private Bridge findFreeBridge(ComputerVertex start) throws EmptySetException
+	private Bridge findFreeBridge(ComputerVertex start) throws NoBridgeFoundException
 	{
-		boolean found = false;
-		int maxIndex = mainPath.size()-1;
-		int i = 0;
-		while(i < maxIndex && !found)
-		{
-			ComputerVertex current = mainPath.get(i);
-			boolean hasHop = hasNextHop(current, Direction.FORWARDS);
-			if(hasHop)
+		try {
+			boolean found = false;
+			int maxIndex = mainPath.size()-1;
+			int i = 0;
+			while(i < maxIndex && !found)
 			{
-				ComputerVertex next = mainPath.get(i+1);
-				Set<ComputerVertex> linkSet = boardGraph.getLinks(current, next);
+				ComputerVertex current = mainPath.get(i);
+				boolean hasHop = hasNextHop(current, Direction.FORWARDS);
+				if(hasHop)
+				{
+					ComputerVertex next = mainPath.get(i+1);
+					Set<ComputerVertex> linkSet = boardGraph.getLinks(current, next);
 
-				Bridge freeBridge = new Bridge();
-				freeBridge.setHops(current, next);
-				freeBridge.setLinks(linkSet);
-				BridgeState state = freeBridge.getBridgeState(colour);
-				if(state.equals(BridgeState.FREE))
-					return freeBridge;
+					Bridge freeBridge = new Bridge();
+					freeBridge.setHops(current, next);
+					freeBridge.setLinks(linkSet);
+					BridgeState state = freeBridge.getBridgeState(colour);
+					if(state.equals(BridgeState.FREE))
+						return freeBridge;
 
+				}
 			}
+		} catch (EmptySetException e) {
+			throw new NoBridgeFoundException();
 		}
 		
-		throw new EmptySetException();
+		throw new NoBridgeFoundException();
+		
+	}
+	
+	public Bridge buildBridge(ComputerVertex current, ComputerVertex next) throws NoBridgeFoundException
+	{
+		try {
+			Set<ComputerVertex> linkSet = boardGraph.getLinks(current, next);
+			Bridge prospectiveBridge = new Bridge();
+			prospectiveBridge.setHops(current, next);
+			prospectiveBridge.setLinks(linkSet);
+			return prospectiveBridge;
+		} catch (EmptySetException e) {
+			throw new NoBridgeFoundException();
+		}
 	}
 
 
