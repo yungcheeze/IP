@@ -201,6 +201,13 @@ public class ComputerBoardGraph {
 		else
 			return true;
 	}
+	
+	public boolean areAdjacent(ComputerVertex v1, ComputerVertex v2)
+	{
+		if(adjacencyList.containsKey(v1) && adjacencyList.containsKey(v2))
+			return adjacencyList.get(v1).contains(v2);
+		else return false;
+	}
 
 	public HashMap<ComputerVertex, Set<ComputerVertex>> getAdjacencyList() {
 		return new HashMap<ComputerVertex, Set<ComputerVertex>>(adjacencyList);
@@ -216,6 +223,7 @@ public class ComputerBoardGraph {
 			throw new EmptySetException();
 		return neighbours;
 	}
+	
 
 	public HashMap<Piece, Set<ComputerVertex>> getHomes() {
 		return new HashMap<Piece, Set<ComputerVertex>>(homes);

@@ -166,8 +166,6 @@ public class ComputerPlayer implements PlayerInterface {
 					int x = linkToUse.getPosition().getXPos();
 					int y = linkToUse.getPosition().getYPos();
 					move.setPosition(x, y);
-					ComputerVertex bh = freeBridge.getBackwardHop();
-					ComputerVertex fh = freeBridge.getForwardHop();
 					displayMoveDecision(move);
 					return move; // gap filled (MOVE MADE)
 				} catch (EmptySetException e) {
@@ -198,13 +196,11 @@ public class ComputerPlayer implements PlayerInterface {
 			// opponent colour and other unset, then return unset;
 			Bridge compromisedBridge;
 			try {
-				compromisedBridge = findCompromisedBridge(tail);
+				compromisedBridge = findCompromisedBridge();
 				ComputerVertex linkToSave = compromisedBridge.getCompromisedLink();
 				int x = linkToSave.getPosition().getXPos();
 				int y = linkToSave.getPosition().getYPos();
 				move.setPosition(x, y);
-				ComputerVertex bh = compromisedBridge.getBackwardHop();
-				ComputerVertex fh = compromisedBridge.getForwardHop();
 				displayMoveDecision(move);
 				return move; // save compromised hop (MOVE MADE)
 				
@@ -321,10 +317,45 @@ public class ComputerPlayer implements PlayerInterface {
 	}
 	
 	//TODO hasHop method
-	private boolean hasHop(ComputerVertex v, Direction d)
+	private boolean hasNextHop(ComputerVertex u, Direction d)
 	{
-		if (d.equals(Direction.FORWARDS))
+		boolean toReturn = false;
+		try {
+			if (mainPath.contains(u))
+			{
+				int uIndex = mainPath.indexOf(u);
+				int maxIndex = mainPath.size() - 1;
+				
+				if (d.equals(Direction.FORWARDS) && uIndex < maxIndex)
+				{
+					ComputerVertex v = mainPath.get(uIndex + 1);
+					int noOfLinks = boardGraph.getLinks(u, v).size();
+					boolean adjacent = boardGraph.areAdjacent(u, v);
+
+					if(noOfLinks == 2 && !adjacent)
+						toReturn = true;
+					
+					
+				}
+				else if(d.equals(Direction.FORWARDS) && uIndex > 0)
+				{
+					ComputerVertex v = mainPath.get(uIndex - 1);
+					int noOfLinks = boardGraph.getLinks(u, v).size();
+					boolean adjacent = boardGraph.areAdjacent(u, v);
+
+					if(noOfLinks == 2 && !adjacent)
+						toReturn = true;;
+				}
+					
+			}
+		} catch (EmptySetException e) {
+			return false;
+		}
+		return toReturn;
+					
 	}
+	
+	
 	
 	//TODO add changeDirection Method
 	//if notMoving forwards and d = backwards
@@ -477,33 +508,23 @@ public class ComputerPlayer implements PlayerInterface {
 	// modified pathTraversal() if links between start and hop contain one
 	// opponent colour and other unset, then return unset;
 	//TODO make iterative instead of recursive
-	public Bridge findCompromisedBridge(ComputerVertex start) throws EmptySetException {
-		Direction d = Direction.FORWARDS;
-		//TODO Replace with linked list implementation
-		if (start.hasHop(d)) { //has next element on linked list
-			ComputerVertex forwardHop = (ComputerVertex) start.getHop(d); //= next element on linked list
-			Set<ComputerVertex> links = boardGraph.getLinks(start, forwardHop);
-			HashMap<Piece, ComputerVertex> colourMap = new HashMap<Piece, ComputerVertex>();
-
-			for (ComputerVertex link : links) {
-				Piece colour = link.getColour();
-				colourMap.put(colour, link);
+	public Bridge findCompromisedBridge() throws EmptySetException {
+		
+		boolean found = false;
+		int maxIndex = mainPath.size()-1;
+		int i = 0;
+		while(i < maxIndex && !found)
+		{
+			ComputerVertex current = mainPath.get(i);
+			boolean hasHop = hasNextHop(current, Direction.FORWARDS);
+			if(hasHop)
+			{
+				ComputerVertex next = mainPath.get(i+1);
+				Set<ComputerVertex> linkSet = boardGraph.getLinks(current, next);
+				ArrayList<ComputerVertex> links = new ArrayList<ComputerVertex>(linkSet);
+				Bridge
 			}
-
-			Piece otherColour = opponentsColour();
-
-			if (colourMap.containsKey(Piece.UNSET) && colourMap.containsKey(otherColour)) {
-				Bridge bridge = new Bridge();
-				bridge.setBackwardHop(start);
-				bridge.setForwardHop(forwardHop);
-				bridge.setLinks(links);
-				bridge.setCompromisedLink(colourMap.get(Piece.UNSET));
-				return bridge;
-
-			} else
-				return findCompromisedBridge(forwardHop);
-		} else
-			throw new EmptySetException();
+		}
 
 	}
 	

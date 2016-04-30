@@ -7,8 +7,8 @@ import java.util.Set;
 
 public class Bridge {
 
-	private ComputerVertex forwardHop;
-	private ComputerVertex backwardHop;
+	private ComputerVertex leadingHop; //more advanced hop in direction of travel
+	private ComputerVertex trailingHop; //further back hop in direction of travel
 	private ComputerVertex link1;
 	private ComputerVertex link2;
 	private ComputerVertex compromisedlink;
@@ -19,34 +19,34 @@ public class Bridge {
 
 	public Set<ComputerVertex> getHops() {
 		Set<ComputerVertex> hops = new HashSet<ComputerVertex>();
-		hops.add(forwardHop);
-		hops.add(backwardHop);
+		hops.add(leadingHop);
+		hops.add(trailingHop);
 		return hops;
 	}
 
 	public void setHops(ComputerVertex v1, ComputerVertex v2) {
-		forwardHop = v1;
-		backwardHop = v2;
+		leadingHop = v1;
+		trailingHop = v2;
 	}
 	
-	public void setForwardHop(ComputerVertex v)
+	public void setLeadingHop(ComputerVertex v)
 	{
-		forwardHop = v;
+		leadingHop = v;
 	}
 	
-	public void setBackwardHop(ComputerVertex v)
+	public void setTrailingHop(ComputerVertex v)
 	{
-		backwardHop = v;
+		trailingHop = v;
 	}
 	
-	public ComputerVertex getForwardHop()
+	public ComputerVertex getLeadingHop()
 	{
-		return forwardHop;
+		return leadingHop;
 	}
 	
 	public ComputerVertex getBackwardHop()
 	{
-		return backwardHop;
+		return trailingHop;
 	}
 	
 
@@ -57,17 +57,20 @@ public class Bridge {
 		return links;
 	}
 
-	public void setLinks(ComputerVertex v1, ComputerVertex v2) {
+	public boolean setLinks(ComputerVertex v1, ComputerVertex v2) {
 		link1 = v1;
 		link2 = v2;
+		return true;
 	}
 
-	public void setLinks(Set<ComputerVertex> links) {
+	public boolean setLinks(Set<ComputerVertex> links) {
 		if (links.size() == 2) {
 			List<ComputerVertex> l = new ArrayList<ComputerVertex>(links);
 			link1 = l.get(0);
 			link2 = l.get(1);
+			return true;
 		}
+		else return false;
 	}
 	
 	public void setCompromisedLink(ComputerVertex link)
