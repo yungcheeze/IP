@@ -20,6 +20,7 @@ import game.interfaces.MoveInterface;
 import game.interfaces.NoValidMovesException;
 import game.interfaces.Piece;
 import game.interfaces.PlayerInterface;
+import game.graphs.BridgeState;
 import game.graphs.ComputerVertex;
 import game.graphs.EmptySetException;
 import game.graphs.Position;
@@ -164,7 +165,7 @@ public class ComputerPlayer implements PlayerInterface {
 			Bridge compromisedBridge;
 			try {
 				compromisedBridge = findCompromisedBridge();
-				ComputerVertex linkToSave = compromisedBridge.getCompromisedLink();
+				ComputerVertex linkToSave = compromisedBridge.getSaveableLink();
 				int x = linkToSave.getPosition().getXPos();
 				int y = linkToSave.getPosition().getYPos();
 				move.setPosition(x, y);
@@ -558,26 +559,14 @@ public class ComputerPlayer implements PlayerInterface {
 			{
 				ComputerVertex next = mainPath.get(i+1);
 				Set<ComputerVertex> linkSet = boardGraph.getLinks(current, next);
-				//TODO implement colourMap within Bridge and bridgeState ennum
-				Map<Piece, ComputerVertex> colourMap = new HashMap<Piece, ComputerVertex>();
-				for (ComputerVertex link: linkSet)
-				{
-					Piece c = link.getColour();
-					colourMap.put(c, link);
-				}
-				
-				Piece opponent = opponentsColour();
-				boolean oneFree = colourMap.containsKey(Piece.UNSET);
-				boolean oneTaken = colourMap.containsKey(opponent);
-				if(oneFree && oneTaken)
-				{
-					Bridge compromisedBridge = new Bridge();
-					compromisedBridge.setHops(current, next);
-					compromisedBridge.setLinks(linkSet);
-					ComputerVertex saveableLink = colourMap.get(Piece.UNSET);
-					compromisedBridge.setSaveableLink(saveableLink);
+
+				Bridge compromisedBridge = new Bridge();
+				compromisedBridge.setHops(current, next);
+				compromisedBridge.setLinks(linkSet);
+				BridgeState state = compromisedBridge.getBridgeState(colour);
+				if(state.equals(BridgeState.FREE))
 					return compromisedBridge;
-				}	
+				
 			}
 		}
 		
@@ -599,38 +588,21 @@ public class ComputerPlayer implements PlayerInterface {
 			{
 				ComputerVertex next = mainPath.get(i+1);
 				Set<ComputerVertex> linkSet = boardGraph.getLinks(current, next);
-				Map<Piece, ComputerVertex> colourMap = new HashMap<Piece, ComputerVertex>();
-				for (ComputerVertex link: linkSet)
-				{
-					Piece c = link.getColour();
-					colourMap.put(c, link);
-				}
-				
-				boolean noRED = !colourMap.containsKey(Piece.RED);
-				boolean noBlue = !colourMap.containsKey(Piece.BLUE);
-				if(noRED && noBlue)
-				{
-					Bridge freeBridge = new Bridge();
-					freeBridge.setHops(current, next);
-					freeBridge.setLinks(linkSet);
-					ComputerVertex saveableLink = colourMap.get(Piece.UNSET);
-					freeBridge.setSaveableLink(saveableLink);
+
+				Bridge freeBridge = new Bridge();
+				freeBridge.setHops(current, next);
+				freeBridge.setLinks(linkSet);
+				BridgeState state = freeBridge.getBridgeState(colour);
+				if(state.equals(BridgeState.FREE))
 					return freeBridge;
-				}	
+
 			}
 		}
 		
 		throw new EmptySetException();
 	}
 
-	private Piece opponentsColour() {
-		if (colour.equals(Piece.RED))
-			return Piece.BLUE;
-		else if (colour.equals(Piece.BLUE))
-			return Piece.RED;
-		else
-			return Piece.UNSET;
-	}
+
 
 	// *****************************************************************************
 

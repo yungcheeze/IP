@@ -1,8 +1,12 @@
 package game.graphs;
 
+import game.interfaces.Piece;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class Bridge {
@@ -11,10 +15,10 @@ public class Bridge {
 	private ComputerVertex trailingHop; //further back hop in direction of travel
 	private ComputerVertex link1;
 	private ComputerVertex link2;
-	private ComputerVertex saveablelink;
+	private Map<Piece, ComputerVertex> colourMap;
 
 	public Bridge() {
-
+		colourMap = new HashMap<Piece, ComputerVertex>();
 	}
 
 	public Set<ComputerVertex> getHops() {
@@ -60,6 +64,7 @@ public class Bridge {
 	public boolean setLinks(ComputerVertex v1, ComputerVertex v2) {
 		link1 = v1;
 		link2 = v2;
+		updateColourMap(v1, v2);
 		return true;
 	}
 
@@ -68,19 +73,47 @@ public class Bridge {
 			List<ComputerVertex> l = new ArrayList<ComputerVertex>(links);
 			link1 = l.get(0);
 			link2 = l.get(1);
+			updateColourMap(link1, link2);
 			return true;
 		}
 		else return false;
 	}
 	
-	public void setSaveableLink(ComputerVertex link)
+	private void updateColourMap(ComputerVertex link1, ComputerVertex link2)
 	{
-		saveablelink = link;
+		colourMap.put(link1.getColour(), link1);
+		colourMap.put(link2.getColour(), link2);
 	}
+	
+	public BridgeState getBridgeState(Piece playerColour)
+	{
+		Piece opponent = opponentsColour(playerColour);
+		boolean oneFree = colourMap.containsKey(Piece.UNSET);
+		boolean oneTaken = colourMap.containsKey(opponent);
+		boolean noRED = !colourMap.containsKey(Piece.RED);
+		boolean noBLUE = !colourMap.containsKey(Piece.BLUE);
+		if(oneFree && oneTaken)
+			return BridgeState.COMPROMISED;
+		else if(noRED && noBLUE)
+			return BridgeState.FREE;
+		else 
+			return BridgeState.TAKEN;
+			
+	}
+	
+	private Piece opponentsColour(Piece colour) {
+		if (colour.equals(Piece.RED))
+			return Piece.BLUE;
+		else if (colour.equals(Piece.BLUE))
+			return Piece.RED;
+		else
+			return Piece.UNSET;
+	}
+	
 	
 	public ComputerVertex getSaveableLink()
 	{
-		return saveablelink;
+		return colourMap.get(Piece.UNSET);
 	}
 
 }
