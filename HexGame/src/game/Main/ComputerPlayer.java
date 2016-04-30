@@ -358,6 +358,25 @@ public class ComputerPlayer implements PlayerInterface {
 					
 	}
 	
+	private boolean hasNext(ComputerVertex u, Direction d)
+	{
+		int uIndex = mainPath.indexOf(u);
+		int maxIndex = mainPath.size() - 1;
+		int minIndex = 0;
+		if(d.equals(Direction.FORWARDS))
+		{
+			ComputerVertex v = mainPath.get(uIndex + 1);
+			boolean adjacent = boardGraph.areAdjacent(u, v);
+			return uIndex < maxIndex && adjacent;
+		}
+		else
+		{
+			ComputerVertex v = mainPath.get(uIndex - 1);
+			boolean adjacent = boardGraph.areAdjacent(u, v);
+			return uIndex > minIndex && adjacent;
+		}
+	}
+	
 
 	
 	private boolean changeDirection()
@@ -482,29 +501,46 @@ public class ComputerPlayer implements PlayerInterface {
 		return mostForward;
 	}
 
-//	private boolean pathBroken() {
-//		return !endOfPath(tail, Direction.FORWARDS).equals(head);
-//	}
+	private boolean pathBroken() {
+		return !endOfPath(tail, Direction.FORWARDS).equals(head);
+	}
 	//TODO replace recursive function with linkedList implementation 
-	// from tail to head, returns head
-//	public ComputerVertex endOfPath(ComputerVertex start, Direction d) {
-//
-//		if (start.hasHop(d)) {
-//			ComputerVertex forwardHop = (ComputerVertex) start.getHop(d);
-//			return endOfPath(forwardHop, d);
-//		} else
-//			return start;
-//	}
-//
-//	public int pathLength(ComputerVertex start, Direction d) {
-//		ComputerVertex current = start;
-//		int length = 0;
-//		while (current.hasHop(d)) {
-//			current = (ComputerVertex) current.getHop(d);
-//			length++;
-//		}
-//		return length;
-//	}
+	 //from tail to head, returns head
+	public ComputerVertex endOfPath(ComputerVertex start, Direction d) {
+		//preprocessing
+		int startIndex = mainPath.indexOf(start);
+		int nextIndex = startIndex + 1;
+		if(d.equals(Direction.BACKWARDS))
+			nextIndex = startIndex - 1;
+		
+		boolean hasNext = hasNext(start, d) || hasNextHop(start, d);
+		if (!hasNext) { //base case
+			return start;
+		} else //recursive case
+		{
+			ComputerVertex next = mainPath.get(nextIndex);
+			return endOfPath(next, d);
+			
+		}
+	}
+
+	public int pathLength(ComputerVertex start, Direction d) {
+		ComputerVertex current = start;
+		int currentIndex = mainPath.indexOf(current);
+		
+		int nextIndex = currentIndex + 1;
+		if(d.equals(Direction.BACKWARDS))
+			nextIndex = currentIndex - 1;
+		boolean hasNext = hasNext(current, d) || hasNextHop(current, d);
+		
+		int length = 0;
+		while (hasNext) {
+			current = mainPath.get(nextIndex);
+			hasNext = hasNext(current, d) || hasNextHop(current, d);
+			length++;
+		}
+		return length;
+	}
 
 	// modified pathTraversal() if links between start and hop contain one
 	// opponent colour and other unset, then return unset;
@@ -522,6 +558,7 @@ public class ComputerPlayer implements PlayerInterface {
 			{
 				ComputerVertex next = mainPath.get(i+1);
 				Set<ComputerVertex> linkSet = boardGraph.getLinks(current, next);
+				//TODO implement colourMap within Bridge and bridgeState ennum
 				Map<Piece, ComputerVertex> colourMap = new HashMap<Piece, ComputerVertex>();
 				for (ComputerVertex link: linkSet)
 				{
