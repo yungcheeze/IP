@@ -363,9 +363,16 @@ public class ComputerPlayer implements PlayerInterface {
 	private boolean changeDirection()
 	{
 		if (playingDirection.equals(Direction.FORWARDS) && movingBackwards)
+		{
 			playingDirection = playingDirection.otherDirection();
-		else if (playingDirection.equals(Direction.BACKWARDS) && movingForwards))
+			return true;
+		}
+		else if (playingDirection.equals(Direction.BACKWARDS) && movingForwards)
+		{
 			playingDirection = playingDirection.otherDirection();
+			return true;
+		}
+		else return false;
 	}
 	
 		
