@@ -96,8 +96,10 @@ public class Bridge {
 			return BridgeState.COMPROMISED;
 		else if(noRED && noBLUE)
 			return BridgeState.FREE;
-		else 
-			return BridgeState.TAKEN;
+		else if(oneTaken && !oneFree) 
+			return BridgeState.LOST;
+		else
+			return BridgeState.SAVED;
 			
 	}
 	
