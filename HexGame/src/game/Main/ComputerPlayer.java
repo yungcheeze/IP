@@ -342,7 +342,7 @@ public class ComputerPlayer implements PlayerInterface {
 					
 					
 				}
-				else if(d.equals(Direction.FORWARDS) && uIndex > 0)
+				else if(d.equals(Direction.BACKWARDS) && uIndex > 0)
 				{
 					ComputerVertex v = mainPath.get(uIndex - 1);
 					int noOfLinks = boardGraph.getLinks(u, v).size();
@@ -362,21 +362,21 @@ public class ComputerPlayer implements PlayerInterface {
 	
 	private boolean hasNext(ComputerVertex u, Direction d)
 	{
-		int uIndex = mainPath.indexOf(u);
-		int maxIndex = mainPath.size() - 1;
-		int minIndex = 0;
-		if(d.equals(Direction.FORWARDS))
-		{
-			ComputerVertex v = mainPath.get(uIndex + 1);
-			boolean adjacent = boardGraph.areAdjacent(u, v);
-			return uIndex < maxIndex && adjacent;
-		}
-		else
-		{
-			ComputerVertex v = mainPath.get(uIndex - 1);
-			boolean adjacent = boardGraph.areAdjacent(u, v);
-			return uIndex > minIndex && adjacent;
-		}
+		
+		if (mainPath.contains(u)) {
+			int uIndex = mainPath.indexOf(u);
+			int maxIndex = mainPath.size() - 1;
+			int minIndex = 0;
+			if (d.equals(Direction.FORWARDS) && uIndex < maxIndex) {
+				ComputerVertex v = mainPath.get(uIndex + 1);
+				boolean adjacent = boardGraph.areAdjacent(u, v);
+				return uIndex < maxIndex && adjacent;
+			} else if (d.equals(Direction.BACKWARDS) && uIndex > 0) {
+				ComputerVertex v = mainPath.get(uIndex - 1);
+				boolean adjacent = boardGraph.areAdjacent(u, v);
+				return uIndex > minIndex && adjacent;
+			} else return false;
+		}else return false;
 	}
 	
 

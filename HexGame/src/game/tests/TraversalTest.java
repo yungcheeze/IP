@@ -19,10 +19,7 @@ public class TraversalTest {
 		ComputerVertex v4 = new ComputerVertex(c, p);
 		ComputerVertex v5 = new ComputerVertex(c, p);
 
-		v1.setHop(d.otherDirection(), v2);
-		v2.setHop(d.otherDirection(), v3);
-		v3.setHop(d.otherDirection(), v4);
-		v4.setHop(d.otherDirection(), v5);
+		
 
 		ComputerVertex end = player.endOfPath(v1, d);
 
