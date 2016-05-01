@@ -85,7 +85,7 @@ public class ComputerPlayer implements PlayerInterface {
 			boardGraph.setUpBoardGraph(boardView);
 		else
 			boardGraph.updateBoardGraph(boardView);
-		
+		//TODO clean up and compartmentalise makeMove()
 		ComputerVertex leadingVertex = head;
 		if(playingDirection.equals(Direction.BACKWARDS))
 			leadingVertex = tail;
@@ -377,17 +377,17 @@ public class ComputerPlayer implements PlayerInterface {
 
 		try {
 			if (playingAxis.equals(Axis.X)) {
-				newHead = findGoodPositionInColumn(ymid);
+				newHead = findGoodPositionInColumn(xmid);
 				return newHead;
 			} else {
-				newHead = findGoodPositionInRow(xmid);
+				newHead = findGoodPositionInRow(ymid);
 				return newHead;
 			}
 		} catch (NoGoodVertexException e) {
-			// TODO Auto-generated catch block
 			// Nothing found Carry On
 		}
-
+		
+		//Check all other columns
 		int increment = 1;
 		int nextX = 0;
 		while (increment < xmid) {
@@ -406,6 +406,7 @@ public class ComputerPlayer implements PlayerInterface {
 			}
 		}
 		
+		//Nothing good found, return a random position
 		newHead = anyRandomPosition();
 		return newHead;
 
@@ -451,12 +452,12 @@ public class ComputerPlayer implements PlayerInterface {
 		throw new NoGoodVertexException();
 	}
 	
-	private ComputerVertex findGoodPositionInRow(int yt) throws NoGoodVertexException
+	private ComputerVertex findGoodPositionInRow(int y) throws NoGoodVertexException
 	{
 		int xlim = boardGraph.getXLim();
 		for(int x = 1; x < xlim; x++)
 		{
-			Position pos = new Position(yt,x);
+			Position pos = new Position(y,x);
 			boolean isGood = goodPosition(pos);
 			if (isGood)
 			{
@@ -474,8 +475,7 @@ public class ComputerPlayer implements PlayerInterface {
 	
 	private boolean goodPosition(Position pos)
 	{
-		int xPos = pos.getXPos();
-		int yPos = pos.getYPos();
+		
 		try {
 			ComputerVertex toCheck = boardGraph.getVertex(pos);
 			Set<ComputerVertex> neighbours = getFreeNeighours(toCheck);
