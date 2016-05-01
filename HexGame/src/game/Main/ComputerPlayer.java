@@ -127,12 +127,7 @@ public class ComputerPlayer implements PlayerInterface {
 					ComputerVertex v = (ComputerVertex) hops.toArray()[0];
 					int x = v.getPosition().getXPos();
 					int y = v.getPosition().getYPos();
-					if(playingAxis.equals(Axis.X))
-						ymid ++;
-					else
-						xmid++;
-					position = new Position(xmid, ymid);
-					move.setPosition(xmid, ymid);
+					move.setPosition(x, y);
 					leadingVertex = boardGraph.getVertex(position);
 					leadingVertex = v;
 					head = leadingVertex;
