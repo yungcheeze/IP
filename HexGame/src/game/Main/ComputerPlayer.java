@@ -75,6 +75,10 @@ public class ComputerPlayer implements PlayerInterface {
 		System.out.println("***" + colour + " to play***");
 		
 		Move move = new Move();
+		if(firstMove)
+			boardGraph.setUpBoardGraph(boardView);
+		else
+			boardGraph.updateBoardGraph(boardView);
 		
 		ComputerVertex leadingVertex = head;
 		if(playingDirection.equals(Direction.BACKWARDS))
@@ -84,7 +88,7 @@ public class ComputerPlayer implements PlayerInterface {
 			// first move
 			if (firstMove) {
 				// generate boardGraph
-				boardGraph.setUpBoardGraph(boardView);
+				
 				firstMove = false;
 				// find Centre, and try to place piece there
 				int xlim = boardGraph.getXLim();
@@ -109,16 +113,19 @@ public class ComputerPlayer implements PlayerInterface {
 				// else try random side hop
 				Set<ComputerVertex> hops;
 				try {
+					playingDirection = playingDirection.otherDirection();
 					hops = getFreeHops(position, playingDirection);
 					ComputerVertex mostForward = mostForwardVertex(hops);
 					hops.remove(mostForward);
 					ComputerVertex v = (ComputerVertex) hops.toArray()[0];
 					int x = v.getPosition().getXPos();
 					int y = v.getPosition().getYPos();
-					leadingVertex = boardGraph.getVertex(position);
+					move.setPosition(x, y);
+					leadingVertex = v;
 					head = leadingVertex;
 					tail = leadingVertex;
 					mainPath.add(leadingVertex);
+					playingDirection = playingDirection.otherDirection();
 					displayMoveDecision(move);
 					return move; // MOVE MADE
 				} catch (EmptySetException e) {
@@ -131,7 +138,7 @@ public class ComputerPlayer implements PlayerInterface {
 			}
 
 			// Main Sequence
-			boardGraph.updateBoardGraph(boardView);
+			
 			
 			// hops refer to two-bridges
 			// links refer to connecting vertices in bridge
@@ -224,8 +231,9 @@ public class ComputerPlayer implements PlayerInterface {
 			try {
 				freeHops = getFreeHops(leadingVertex.getPosition(), playingDirection);
 				ComputerVertex mostForwardHop = mostForwardVertex(freeHops);
-				//TODO add to linked list instead
-				//leadingVertex.setHop(playingDirection, mostForwardHop);
+				//TODO if mostForward takes me back, start a new path in a random position
+				//TODO have a counter on times you selected link. if consecutive 3 times, random hop, new path
+				//if moving in one direction consec count limit = 2
 				leadingVertex = mostForwardHop;
 				updateLeadingVertex(mostForwardHop);
 				Position position = mostForwardHop.getPosition();
@@ -438,6 +446,15 @@ public class ComputerPlayer implements PlayerInterface {
 					continue;
 
 				Position uPos = u.getPosition();
+				Bridge bridge;
+				try {
+					bridge = buildBridge(v, u);
+					BridgeState state = bridge.getBridgeState(colour);
+					if(!state.equals(BridgeState.FREE))
+						continue;
+				} catch (NoBridgeFoundException e) {
+					continue;
+				}
 
 				if (playingDirection.equals(Direction.FORWARDS)) {
 					if (playingAxis.equals(Axis.X) && uPos.getXPos() > position.getXPos())
@@ -486,18 +503,27 @@ public class ComputerPlayer implements PlayerInterface {
 		else
 			throw new EmptySetException();
 		for (ComputerVertex v : vertices) {
-			if(playingDirection.equals(Direction.FORWARDS)){
-				if (playingAxis.equals(Axis.X) && v.getPosition().getXPos() > mostForward.getPosition().getXPos())
-					mostForward = v;
-				else if (playingAxis.equals(Direction.BACKWARDS) && v.getPosition().getYPos() > mostForward.getPosition().getYPos())//playingAxis == y
-					mostForward = v;
-			}
-			else{
-				if (playingAxis.equals(Axis.X) && v.getPosition().getXPos() < mostForward.getPosition().getXPos())
-					mostForward = v;
-				else if (playingAxis.equals(Direction.BACKWARDS) && v.getPosition().getYPos() < mostForward.getPosition().getYPos())
-					mostForward = v;
-			}
+			if (!boardGraph.isTaken(v.getPosition())) {
+				if (playingDirection.equals(Direction.FORWARDS)) {
+					if (playingAxis.equals(Axis.X)
+							&& v.getPosition().getXPos() > mostForward
+									.getPosition().getXPos())
+						mostForward = v;
+					else if (playingAxis.equals(Direction.BACKWARDS)
+							&& v.getPosition().getYPos() > mostForward
+									.getPosition().getYPos())//playingAxis == y
+						mostForward = v;
+				} else {
+					if (playingAxis.equals(Axis.X)
+							&& v.getPosition().getXPos() < mostForward
+									.getPosition().getXPos())
+						mostForward = v;
+					else if (playingAxis.equals(Direction.BACKWARDS)
+							&& v.getPosition().getYPos() < mostForward
+									.getPosition().getYPos())
+						mostForward = v;
+				}
+			}else continue;
 		}
 
 		return mostForward;
@@ -591,10 +617,10 @@ public class ComputerPlayer implements PlayerInterface {
 
 				Bridge compromisedBridge = buildBridge(current, next);
 				BridgeState state = compromisedBridge.getBridgeState(colour);
-				if(state.equals(BridgeState.FREE))
-					return compromisedBridge;
-				
+				if(state.equals(BridgeState.COMPROMISED))
+					return compromisedBridge;	
 			}
+			i++;
 		}
 		
 		throw new NoBridgeFoundException();
@@ -617,8 +643,8 @@ public class ComputerPlayer implements PlayerInterface {
 				BridgeState state = freeBridge.getBridgeState(colour);
 				if(state.equals(BridgeState.FREE))
 					return freeBridge;
-
 			}
+			i++;
 		}
 		
 		throw new NoBridgeFoundException();

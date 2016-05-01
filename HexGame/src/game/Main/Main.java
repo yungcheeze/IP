@@ -9,7 +9,7 @@ public class Main {
 	       PlayerInterface player1 = new HumanPlayer();
 	       PlayerInterface player2 = new ComputerPlayer();
 	       
-	       game.boardSize(5,5);
+	       game.boardSize(8,8);
 	       game.specifyPlayer(player1, Piece.RED);
 	       game.specifyPlayer(player2, Piece.BLUE);
 	       

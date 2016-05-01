@@ -88,6 +88,7 @@ public class Bridge {
 	public BridgeState getBridgeState(Piece playerColour)
 	{
 		Piece opponent = opponentsColour(playerColour);
+		boolean notPlayerColour = !colourMap.containsKey(playerColour);
 		boolean oneFree = colourMap.containsKey(Piece.UNSET);
 		boolean oneTaken = colourMap.containsKey(opponent);
 		boolean noRED = !colourMap.containsKey(Piece.RED);
@@ -96,7 +97,7 @@ public class Bridge {
 			return BridgeState.COMPROMISED;
 		else if(noRED && noBLUE)
 			return BridgeState.FREE;
-		else if(oneTaken && !oneFree) 
+		else if(oneTaken && notPlayerColour) 
 			return BridgeState.LOST;
 		else
 			return BridgeState.SAVED;
