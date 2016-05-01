@@ -24,6 +24,7 @@ import game.graphs.BridgeState;
 import game.graphs.ComputerVertex;
 import game.graphs.EmptySetException;
 import game.graphs.NoBridgeFoundException;
+import game.graphs.NoGoodVertexException;
 import game.graphs.Position;
 import game.graphs.PositionType;;
 
@@ -114,7 +115,7 @@ public class ComputerPlayer implements PlayerInterface {
 					mainPath.add(leadingVertex);
 					return move; // MOVE MADE
 				}
-
+				//TODO reactivate random sideHop code after tests
 				// else try random side hop
 				Set<ComputerVertex> hops;
 				//try {
@@ -242,9 +243,6 @@ public class ComputerPlayer implements PlayerInterface {
 			try {
 				freeHops = getFreeHops(leadingVertex.getPosition(), playingDirection);
 				ComputerVertex mostForwardHop = mostForwardVertex(freeHops);
-				//TODO if mostForward takes me back, start a new path free hop along middle line
-				//TODO have a counter on times you selected link. if consecutive 3 times, free hop along middle line
-				//if moving in one direction consec count limit = 2
 				leadingVertex = mostForwardHop;
 				updateLeadingVertex(mostForwardHop);
 				Position position = mostForwardHop.getPosition();
@@ -252,6 +250,7 @@ public class ComputerPlayer implements PlayerInterface {
 				int y = position.getYPos();
 				move.setPosition(x, y);
 				displayMoveDecision(move);
+				resetadjacencyCount(); 
 				changeDirection(); // switch directions
 				return move; // place piece (MOVE MADE)
 			} catch (EmptySetException e) {
@@ -272,6 +271,7 @@ public class ComputerPlayer implements PlayerInterface {
 				int y = mostForward.getPosition().getYPos();
 				move.setPosition(x, y);
 				displayMoveDecision(move);
+				incrementAdjacencyCount();
 				changeDirection();
 				return move; // place piece (MOVE MADE)
 			} catch (EmptySetException e) {
@@ -281,12 +281,22 @@ public class ComputerPlayer implements PlayerInterface {
 			}
 			
 			//check for random free vertex
-			//Set<ComputerVertex> allVertices = boardGraph.getAdjacencyList().keySet();
-			//ComputerVertex 
-			
-			
-			
-			
+//			try {
+//				ComputerVertex randomFreeVertex = anyRandomPosition();
+//				Position randomPosition = randomFreeVertex.getPosition();
+//				int x = randomPosition.getXPos();
+//				int y = randomPosition.getYPos();
+//				move.setPosition(x, y);
+//				displayMoveDecision(move);
+//				
+//				return move;
+//			} catch (NoGoodVertexException e) {
+//				move.setConceded();
+//				displayMoveDecision(move);
+//				e.printStackTrace();
+//				return move;
+//			}
+//			
 			
 			
 
@@ -332,21 +342,97 @@ public class ComputerPlayer implements PlayerInterface {
 		adjacencyCount.put(playingDirection, current + 1);
 	}
 	
-	private void resetPath()
+	private int getAdjacencyCount()
 	{
-		mainPath.clear();
+		return adjacencyCount.get(playingDirection);
+	}
+	
+	private void resetadjacencyCount()
+	{
+		adjacencyCount.put(Direction.FORWARDS, 0);
+		adjacencyCount.put(Direction.BACKWARDS, 0);
+	}
+	
+	private void resetPath() throws NoGoodVertexException
+	{
+		
 		//find new start;
+		ComputerVertex newHead = findNewHead();
+		mainPath.clear();
+		mainPath.add(newHead);
+		head = newHead;
+		tail = newHead;
+		resetadjacencyCount();
+	}
+	
+	private ComputerVertex findNewHead() throws NoGoodVertexException
+	{
+		ComputerVertex newHead;
+
 		int xlim = boardGraph.getXLim();
 		int ylim = boardGraph.getYlim();
-		//Check Middle
+		// Check Middle
 		int xmid = (int) Math.floor(xlim / 2);
 		int ymid = (int) Math.floor(ylim / 2);
+
+		try {
+			if (playingAxis.equals(Axis.X)) {
+				newHead = findGoodPositionInColumn(ymid);
+				return newHead;
+			} else {
+				newHead = findGoodPositionInRow(xmid);
+				return newHead;
+			}
+		} catch (NoGoodVertexException e) {
+			// TODO Auto-generated catch block
+			// Nothing found Carry On
+		}
+
+		int increment = 1;
+		int nextX = 0;
+		while (increment < xmid) {
+			if (increment % 2 == 0)
+				nextX = xmid - increment;
+			else
+				nextX = xmid + increment;
+
+			increment++;
+
+			try {
+				newHead = findGoodPositionInColumn(nextX);
+				return newHead;
+			} catch (NoGoodVertexException e) {
+				continue;
+			}
+		}
+		
+		newHead = anyRandomPosition();
+		return newHead;
+
+//		throw new NoGoodVertexException();
+		
 		
 	}
 	
-	private ComputerVertex findGoodPositionInColumn(int x)
+	private ComputerVertex anyRandomPosition() throws NoGoodVertexException
+	{
+		Set<ComputerVertex> allVertices = boardGraph.getAllVertices();
+		
+		for(ComputerVertex v : allVertices)
+		{
+			if(!boardGraph.isTaken(v.getPosition()))
+				return v;
+		}
+		
+		throw new NoGoodVertexException();
+	}
+	
+	private ComputerVertex findGoodPositionInColumn(int x) throws NoGoodVertexException
 	{
 		int ylim = boardGraph.getYlim();
+		int xlim = boardGraph.getXLim();
+		if(x < 0 || x >= xlim )
+			throw new NoGoodVertexException();
 		for(int y = 1; y < ylim; y++)
 		{
 			Position pos = new Position(x,y);
@@ -361,6 +447,29 @@ public class ComputerPlayer implements PlayerInterface {
 				}
 			}
 		}
+		
+		throw new NoGoodVertexException();
+	}
+	
+	private ComputerVertex findGoodPositionInRow(int yt) throws NoGoodVertexException
+	{
+		int xlim = boardGraph.getXLim();
+		for(int x = 1; x < xlim; x++)
+		{
+			Position pos = new Position(yt,x);
+			boolean isGood = goodPosition(pos);
+			if (isGood)
+			{
+				try {
+					ComputerVertex newHead = boardGraph.getVertex(pos);
+					return newHead;
+				} catch (InvalidPositionException e) {
+					continue;
+				}
+			}
+		}
+		
+		throw new NoGoodVertexException();
 	}
 	
 	private boolean goodPosition(Position pos)

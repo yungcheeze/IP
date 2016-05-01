@@ -224,6 +224,11 @@ public class ComputerBoardGraph {
 		return neighbours;
 	}
 	
+	public Set<ComputerVertex> getAllVertices()
+	{
+		return adjacencyList.keySet();
+	}
+	
 
 	public HashMap<Piece, Set<ComputerVertex>> getHomes() {
 		return new HashMap<Piece, Set<ComputerVertex>>(homes);
