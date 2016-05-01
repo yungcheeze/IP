@@ -268,6 +268,7 @@ public class ComputerPlayer implements PlayerInterface {
 				Set<ComputerVertex> freeVertices = new HashSet<ComputerVertex>();
 				try {
 					freeVertices = getFreeNeighours(leadingVertex);
+					//Make it most in line.
 					ComputerVertex mostForward = mostForwardVertex(freeVertices);
 					updateLeadingVertex(mostForward);
 					int x = mostForward.getPosition().getXPos();
@@ -372,13 +373,14 @@ public class ComputerPlayer implements PlayerInterface {
 	
 	private void resetPath() throws NoGoodVertexException
 	{
-		
 		//find new start;
 		ComputerVertex newHead = findNewHead();
 		mainPath.clear();
 		mainPath.add(newHead);
 		head = newHead;
 		tail = newHead;
+		movingForwards = true;
+		movingBackwards = true;
 		adjacencyCount.put(Direction.FORWARDS, 0);
 		adjacencyCount.put(Direction.BACKWARDS, 0);
 	}
@@ -465,7 +467,7 @@ public class ComputerPlayer implements PlayerInterface {
 		
 		throw new NoGoodVertexException();
 	}
-	
+	//TODO make iterations middle out
 	private ComputerVertex findGoodPositionInColumn(int x) throws NoGoodVertexException
 	{
 		int ylim = boardGraph.getYlim();
@@ -489,7 +491,7 @@ public class ComputerPlayer implements PlayerInterface {
 		
 		throw new NoGoodVertexException();
 	}
-	
+	//TODO make iterations middle out
 	private ComputerVertex findGoodPositionInRow(int y) throws NoGoodVertexException
 	{
 		int xlim = boardGraph.getXLim();
@@ -716,24 +718,18 @@ public class ComputerPlayer implements PlayerInterface {
 		else
 			throw new EmptySetException();
 		for (ComputerVertex v : vertices) {
+			boolean biggerXPos = v.getPosition().getXPos() > mostForward.getPosition().getXPos();
+			boolean biggerYPos = v.getPosition().getYPos() > mostForward.getPosition().getYPos();
 			if (!boardGraph.isTaken(v.getPosition())) {
 				if (playingDirection.equals(Direction.FORWARDS)) {
-					if (playingAxis.equals(Axis.X)
-							&& v.getPosition().getXPos() > mostForward
-									.getPosition().getXPos())
+					if (playingAxis.equals(Axis.X) && biggerXPos)
 						mostForward = v;
-					else if (playingAxis.equals(Direction.BACKWARDS)
-							&& v.getPosition().getYPos() > mostForward
-									.getPosition().getYPos())//playingAxis == y
+					else if (playingAxis.equals(Axis.Y) && biggerYPos)//playingAxis == y
 						mostForward = v;
 				} else {
-					if (playingAxis.equals(Axis.X)
-							&& v.getPosition().getXPos() < mostForward
-									.getPosition().getXPos())
+					if (playingAxis.equals(Axis.X)&& v.getPosition().getXPos() < mostForward.getPosition().getXPos())
 						mostForward = v;
-					else if (playingAxis.equals(Direction.BACKWARDS)
-							&& v.getPosition().getYPos() < mostForward
-									.getPosition().getYPos())
+					else if (playingAxis.equals(Axis.Y) && v.getPosition().getYPos() < mostForward.getPosition().getYPos())
 						mostForward = v;
 				}
 			}else continue;
