@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane.RestoreAction;
+
 import game.AuxClasses.Axis;
 import game.AuxClasses.Direction;
 import game.graphs.Bridge;
@@ -236,7 +238,7 @@ public class ComputerPlayer implements PlayerInterface {
 
 			
 			
-			
+			//TODO if neigbour is freeEndVertex, skip finding a new link. reset adjacencycount
 			
 			// check for hop in current direction with free links
 			Set<ComputerVertex> freeHops = new HashSet<ComputerVertex>();
@@ -258,26 +260,42 @@ public class ComputerPlayer implements PlayerInterface {
 				//if caught, then no free hops therefore proceed to find free adjacent vertex
 //				e.printStackTrace();
 			} 
-
-
-			// check for link in current direction
-			Set<ComputerVertex> freeVertices = new HashSet<ComputerVertex>();
 			
-			try {
-				freeVertices = getFreeNeighours(leadingVertex);
-				ComputerVertex mostForward = mostForwardVertex(freeVertices);
-				updateLeadingVertex(mostForward);
-				int x = mostForward.getPosition().getXPos();
-				int y = mostForward.getPosition().getYPos();
-				move.setPosition(x, y);
-				displayMoveDecision(move);
-				incrementAdjacencyCount();
-				changeDirection();
-				return move; // place piece (MOVE MADE)
-			} catch (EmptySetException e) {
-				//thrown by getfreeNeighbours
-				//if caught, then no free neighbours therefore proceed to find random free vertex
-//				e.printStackTrace();
+			boolean tooManyAdjacencies = getAdjacencyCount() == 1;
+			
+			if (!tooManyAdjacencies) {
+				// check for link in current direction
+				Set<ComputerVertex> freeVertices = new HashSet<ComputerVertex>();
+				try {
+					freeVertices = getFreeNeighours(leadingVertex);
+					ComputerVertex mostForward = mostForwardVertex(freeVertices);
+					updateLeadingVertex(mostForward);
+					int x = mostForward.getPosition().getXPos();
+					int y = mostForward.getPosition().getYPos();
+					move.setPosition(x, y);
+					displayMoveDecision(move);
+					incrementAdjacencyCount();
+					changeDirection();
+					return move; // place piece (MOVE MADE)
+				} catch (EmptySetException e) {
+					//thrown by getfreeNeighbours
+					//if caught, then no free neighbours therefore proceed to find random free vertex
+					//				e.printStackTrace();
+				}
+			}
+			else
+			{
+				try {
+					resetPath();
+					Position nextPos = head.getPosition();
+					int x = nextPos.getXPos();
+					int y = nextPos.getYPos();
+					move.setPosition(x, y);
+					return move;
+				} catch (NoGoodVertexException e) {
+					System.out.println("Move Decision Sequence Failed");
+					e.printStackTrace();
+				}
 			}
 			
 			//check for random free vertex
@@ -349,8 +367,7 @@ public class ComputerPlayer implements PlayerInterface {
 	
 	private void resetadjacencyCount()
 	{
-		adjacencyCount.put(Direction.FORWARDS, 0);
-		adjacencyCount.put(Direction.BACKWARDS, 0);
+		adjacencyCount.put(playingDirection, 0);
 	}
 	
 	private void resetPath() throws NoGoodVertexException
@@ -362,7 +379,8 @@ public class ComputerPlayer implements PlayerInterface {
 		mainPath.add(newHead);
 		head = newHead;
 		tail = newHead;
-		resetadjacencyCount();
+		adjacencyCount.put(Direction.FORWARDS, 0);
+		adjacencyCount.put(Direction.BACKWARDS, 0);
 	}
 	
 	private ComputerVertex findNewHead() throws NoGoodVertexException
@@ -387,25 +405,45 @@ public class ComputerPlayer implements PlayerInterface {
 			// Nothing found Carry On
 		}
 		
-		//Check all other columns
-		int increment = 1;
-		int nextX = 0;
-		while (increment < xmid) {
-			if (increment % 2 == 0)
-				nextX = xmid - increment;
-			else
-				nextX = xmid + increment;
+		// Check all other columns
+		if (playingAxis.equals(Axis.X)) {
+			int increment = 1;
+			int nextX = 0;
+			while (increment < xmid) {
+				if (increment % 2 == 0)
+					nextX = xmid - increment;
+				else
+					nextX = xmid + increment;
 
-			increment++;
+				increment++;
 
-			try {
-				newHead = findGoodPositionInColumn(nextX);
-				return newHead;
-			} catch (NoGoodVertexException e) {
-				continue;
+				try {
+					newHead = findGoodPositionInColumn(nextX);
+					return newHead;
+				} catch (NoGoodVertexException e) {
+					continue;
+				}
 			}
+		} else {
+			int increment = 1;
+			int nextY = 0;
+			while (increment < ymid) {
+				if (increment % 2 == 0)
+					nextY = ymid - increment;
+				else
+					nextY = ymid + increment;
+
+				increment++;
+
+				try {
+					newHead = findGoodPositionInRow(nextY);
+					return newHead;
+				} catch (NoGoodVertexException e) {
+					continue;
+				}
+			}
+			
 		}
-		
 		//Nothing good found, return a random position
 		newHead = anyRandomPosition();
 		return newHead;
