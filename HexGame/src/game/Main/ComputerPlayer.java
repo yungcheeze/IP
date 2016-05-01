@@ -96,7 +96,7 @@ public class ComputerPlayer implements PlayerInterface {
 			// first move
 			if (firstMove) {
 				// generate boardGraph
-				
+
 				firstMove = false;
 				// find Centre, and try to place piece there
 				int xlim = boardGraph.getXLim();
@@ -116,15 +116,21 @@ public class ComputerPlayer implements PlayerInterface {
 					tail = leadingVertex;
 					mainPath.add(leadingVertex);
 					return move; // MOVE MADE
-				}
-				// else try random side hop
-				Set<ComputerVertex> hops;
-				try {
-					playingDirection = playingDirection.otherDirection();
-					hops = getFreeHops(position, playingDirection);
-					ComputerVertex mostForward = mostForwardVertex(hops);
-					hops.remove(mostForward);
-					ComputerVertex v = (ComputerVertex) hops.toArray()[0];
+				} else {
+					// else try random side hop
+					ComputerVertex mostForward;
+					try {
+						mostForward = findNewHead();
+					} catch (NoGoodVertexException e) {
+						try {
+							mostForward = anyRandomPosition();
+						} catch (NoGoodVertexException e1) {
+							move.setConceded();
+							displayMoveDecision(move);
+							return move;
+						}
+					}
+					ComputerVertex v = mostForward;
 					int x = v.getPosition().getXPos();
 					int y = v.getPosition().getYPos();
 					move.setPosition(x, y);
@@ -133,15 +139,9 @@ public class ComputerPlayer implements PlayerInterface {
 					head = leadingVertex;
 					tail = leadingVertex;
 					mainPath.add(leadingVertex);
-					playingDirection = playingDirection.otherDirection();
 					displayMoveDecision(move);
 					return move; // MOVE MADE
-				} catch (EmptySetException e) {
-					 //Thrown by getFreeHops
-					//if none found continue to find random free vertex
-					e.printStackTrace();
 				}
-				
 
 			}
 
