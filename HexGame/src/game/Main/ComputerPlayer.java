@@ -748,8 +748,10 @@ public class ComputerPlayer implements PlayerInterface {
 		else
 			throw new EmptySetException();
 		for (ComputerVertex v : vertices) {
-			boolean biggerXPos = v.getPosition().getXPos() > mostForward.getPosition().getXPos();
-			boolean biggerYPos = v.getPosition().getYPos() > mostForward.getPosition().getYPos();
+			boolean biggerXPos = v.getPosition().getXPos() >= mostForward.getPosition().getXPos();
+			boolean biggerYPos = v.getPosition().getYPos() >= mostForward.getPosition().getYPos();
+			boolean smallerXPos = v.getPosition().getXPos() <= mostForward.getPosition().getXPos();
+			boolean smallerYPos = v.getPosition().getYPos() <= mostForward.getPosition().getYPos();
 			boolean aheadOfSourceX = v.getPosition().getXPos() > source.getPosition().getXPos();
 			boolean aheadOfSourceY = v.getPosition().getYPos() > source.getPosition().getYPos();
 			boolean inXLine = v.getPosition().getYPos() == source.getPosition().getYPos();
@@ -764,10 +766,10 @@ public class ComputerPlayer implements PlayerInterface {
 						mostForward = v;
 					}
 				} else {
-					if (playingAxis.equals(Axis.X)&& !biggerXPos){
+					if (playingAxis.equals(Axis.X)&& smallerXPos){
 						if(inXLine && aheadOfSourceX) return v;
 						mostForward = v;
-					} else if (playingAxis.equals(Axis.Y) && !biggerYPos){
+					} else if (playingAxis.equals(Axis.Y) && smallerYPos){
 						if(inYLine  && aheadOfSourceY) return v;
 						mostForward = v;
 					}
