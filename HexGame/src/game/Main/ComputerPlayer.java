@@ -750,23 +750,25 @@ public class ComputerPlayer implements PlayerInterface {
 		for (ComputerVertex v : vertices) {
 			boolean biggerXPos = v.getPosition().getXPos() > mostForward.getPosition().getXPos();
 			boolean biggerYPos = v.getPosition().getYPos() > mostForward.getPosition().getYPos();
+			boolean aheadOfSourceX = v.getPosition().getXPos() > source.getPosition().getXPos();
+			boolean aheadOfSourceY = v.getPosition().getYPos() > source.getPosition().getYPos();
 			boolean inXLine = v.getPosition().getYPos() == source.getPosition().getYPos();
 			boolean inYLine = v.getPosition().getYPos() == source.getPosition().getYPos();
 			if (!boardGraph.isTaken(v.getPosition())) {
 				if (playingDirection.equals(Direction.FORWARDS)) {
 					if (playingAxis.equals(Axis.X) && biggerXPos){
-						if(inXLine) return v;
+						if(inXLine && aheadOfSourceX) return v;
 						mostForward = v;
 					} else if (playingAxis.equals(Axis.Y) && biggerYPos){//playingAxis == y
-						if(inYLine) return v;
+						if(inYLine && aheadOfSourceY) return v;
 						mostForward = v;
 					}
 				} else {
 					if (playingAxis.equals(Axis.X)&& !biggerXPos){
-						if(inXLine) return v;
+						if(inXLine && aheadOfSourceX) return v;
 						mostForward = v;
 					} else if (playingAxis.equals(Axis.Y) && !biggerYPos){
-						if(inYLine) return v;
+						if(inYLine  && aheadOfSourceY) return v;
 						mostForward = v;
 					}
 				}
