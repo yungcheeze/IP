@@ -117,17 +117,16 @@ public class ComputerPlayer implements PlayerInterface {
 					mainPath.add(leadingVertex);
 					return move; // MOVE MADE
 				}
-				//TODO reactivate random sideHop code after tests
 				// else try random side hop
 				Set<ComputerVertex> hops;
-				//try {
-//					playingDirection = playingDirection.otherDirection();
-//					hops = getFreeHops(position, playingDirection);
-//					ComputerVertex mostForward = mostForwardVertex(hops);
-//					hops.remove(mostForward);
-//					ComputerVertex v = (ComputerVertex) hops.toArray()[0];
-//					int x = v.getPosition().getXPos();
-//					int y = v.getPosition().getYPos();
+				try {
+					playingDirection = playingDirection.otherDirection();
+					hops = getFreeHops(position, playingDirection);
+					ComputerVertex mostForward = mostForwardVertex(hops);
+					hops.remove(mostForward);
+					ComputerVertex v = (ComputerVertex) hops.toArray()[0];
+					int x = v.getPosition().getXPos();
+					int y = v.getPosition().getYPos();
 					if(playingAxis.equals(Axis.X))
 						ymid ++;
 					else
@@ -135,18 +134,18 @@ public class ComputerPlayer implements PlayerInterface {
 					position = new Position(xmid, ymid);
 					move.setPosition(xmid, ymid);
 					leadingVertex = boardGraph.getVertex(position);
-					//leadingVertex = v;
+					leadingVertex = v;
 					head = leadingVertex;
 					tail = leadingVertex;
 					mainPath.add(leadingVertex);
-//					playingDirection = playingDirection.otherDirection();
+					playingDirection = playingDirection.otherDirection();
 					displayMoveDecision(move);
 					return move; // MOVE MADE
-				//} catch (EmptySetException e) {
-					// Thrown by getFreeHops
+				} catch (EmptySetException e) {
+					 //Thrown by getFreeHops
 					//if none found continue to find random free vertex
-//					e.printStackTrace();
-				//}
+					e.printStackTrace();
+				}
 				
 
 			}
