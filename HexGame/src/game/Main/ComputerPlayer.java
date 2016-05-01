@@ -112,27 +112,33 @@ public class ComputerPlayer implements PlayerInterface {
 
 				// else try random side hop
 				Set<ComputerVertex> hops;
-				try {
-					playingDirection = playingDirection.otherDirection();
-					hops = getFreeHops(position, playingDirection);
-					ComputerVertex mostForward = mostForwardVertex(hops);
-					hops.remove(mostForward);
-					ComputerVertex v = (ComputerVertex) hops.toArray()[0];
-					int x = v.getPosition().getXPos();
-					int y = v.getPosition().getYPos();
-					move.setPosition(x, y);
-					leadingVertex = v;
+				//try {
+//					playingDirection = playingDirection.otherDirection();
+//					hops = getFreeHops(position, playingDirection);
+//					ComputerVertex mostForward = mostForwardVertex(hops);
+//					hops.remove(mostForward);
+//					ComputerVertex v = (ComputerVertex) hops.toArray()[0];
+//					int x = v.getPosition().getXPos();
+//					int y = v.getPosition().getYPos();
+					if(playingAxis.equals(Axis.X))
+						ymid ++;
+					else
+						xmid++;
+					position = new Position(xmid, ymid);
+					move.setPosition(xmid, ymid);
+					leadingVertex = boardGraph.getVertex(position);
+					//leadingVertex = v;
 					head = leadingVertex;
 					tail = leadingVertex;
 					mainPath.add(leadingVertex);
-					playingDirection = playingDirection.otherDirection();
+//					playingDirection = playingDirection.otherDirection();
 					displayMoveDecision(move);
 					return move; // MOVE MADE
-				} catch (EmptySetException e) {
+				//} catch (EmptySetException e) {
 					// Thrown by getFreeHops
 					//if none found continue to find random free vertex
 //					e.printStackTrace();
-				}
+				//}
 				
 
 			}
@@ -231,8 +237,8 @@ public class ComputerPlayer implements PlayerInterface {
 			try {
 				freeHops = getFreeHops(leadingVertex.getPosition(), playingDirection);
 				ComputerVertex mostForwardHop = mostForwardVertex(freeHops);
-				//TODO if mostForward takes me back, start a new path in a random position
-				//TODO have a counter on times you selected link. if consecutive 3 times, random hop, new path
+				//TODO if mostForward takes me back, start a new path free hop along middle line
+				//TODO have a counter on times you selected link. if consecutive 3 times, free hop along middle line
 				//if moving in one direction consec count limit = 2
 				leadingVertex = mostForwardHop;
 				updateLeadingVertex(mostForwardHop);
@@ -490,7 +496,7 @@ public class ComputerPlayer implements PlayerInterface {
 		}
 		
 		if(!freeNeighbours.isEmpty())
-			return allNeighbours;
+			return freeNeighbours;
 		else
 			throw new EmptySetException();
 	}
@@ -525,6 +531,7 @@ public class ComputerPlayer implements PlayerInterface {
 				}
 			}else continue;
 		}
+		
 
 		return mostForward;
 	}
