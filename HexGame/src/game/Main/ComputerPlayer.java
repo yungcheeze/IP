@@ -350,6 +350,16 @@ public class ComputerPlayer implements PlayerInterface {
 		for(int y = 1; y < ylim; y++)
 		{
 			Position pos = new Position(x,y);
+			boolean isGood = goodPosition(pos);
+			if (isGood)
+			{
+				try {
+					ComputerVertex newHead = boardGraph.getVertex(pos);
+					return newHead;
+				} catch (InvalidPositionException e) {
+					continue;
+				}
+			}
 		}
 	}
 	
