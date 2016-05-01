@@ -457,7 +457,7 @@ public class ComputerPlayer implements PlayerInterface {
 		int xlim = boardGraph.getXLim();
 		for(int x = 1; x < xlim; x++)
 		{
-			Position pos = new Position(y,x);
+			Position pos = new Position(x,y);
 			boolean isGood = goodPosition(pos);
 			if (isGood)
 			{
