@@ -232,28 +232,34 @@ public class ComputerPlayer implements PlayerInterface {
 
 			
 			
-			//TODO if neigbour is freeEndVertex, skip finding a new link. reset adjacencycount
 			
-			// check for hop in current direction with free links
-			Set<ComputerVertex> freeHops = new HashSet<ComputerVertex>();
-			try {
-				freeHops = getFreeHops(leadingVertex.getPosition(), playingDirection);
-				ComputerVertex mostForwardHop = mostForwardVertex(freeHops);
-				leadingVertex = mostForwardHop;
-				updateLeadingVertex(mostForwardHop);
-				Position position = mostForwardHop.getPosition();
-				int x = position.getXPos();
-				int y = position.getYPos();
-				move.setPosition(x, y);
-				displayMoveDecision(move);
-				resetadjacencyCount(); 
-				changeDirection(); // switch directions
-				return move; // place piece (MOVE MADE)
-			} catch (EmptySetException e) {
-				//thrown by getfreeHops()
-				//if caught, then no free hops therefore proceed to find free adjacent vertex
-//				e.printStackTrace();
-			} 
+			
+			boolean hasEndNeighbour = hasFreeEndNeighbour(leadingVertex);
+			
+			if (!hasEndNeighbour) {
+				// check for hop in current direction with free links
+				Set<ComputerVertex> freeHops = new HashSet<ComputerVertex>();
+				try {
+					freeHops = getFreeHops(leadingVertex.getPosition(),
+							playingDirection);
+					ComputerVertex mostForwardHop = mostForwardVertex(freeHops);
+					leadingVertex = mostForwardHop;
+					updateLeadingVertex(mostForwardHop);
+					Position position = mostForwardHop.getPosition();
+					int x = position.getXPos();
+					int y = position.getYPos();
+					move.setPosition(x, y);
+					displayMoveDecision(move);
+					resetadjacencyCount();
+					changeDirection(); // switch directions
+					return move; // place piece (MOVE MADE)
+				} catch (EmptySetException e) {
+					//thrown by getfreeHops()
+					//if caught, then no free hops therefore proceed to find free adjacent vertex
+					//				e.printStackTrace();
+				}
+			}
+			else resetadjacencyCount();
 			
 			boolean tooManyAdjacencies = getAdjacencyCount() == 1;
 			
@@ -596,7 +602,21 @@ public class ComputerPlayer implements PlayerInterface {
 		}else return false;
 	}
 	
-
+	private boolean hasFreeEndNeighbour(ComputerVertex u)
+	{
+		Set<ComputerVertex> neighbours;
+		try {
+			neighbours = getFreeNeighours(u);
+		} catch (EmptySetException e) {
+			return false;
+		}
+		
+		for (ComputerVertex v : neighbours) {
+			if (v.isEND(colour) || v.isHOME(colour))
+				return true;
+		}
+		return false;
+	}
 	
 	private boolean changeDirection()
 	{
@@ -736,7 +756,6 @@ public class ComputerPlayer implements PlayerInterface {
 	private ComputerVertex mostForwardAndInLineVertex(Set<ComputerVertex> vertices, ComputerVertex source) throws EmptySetException {
 		ArrayList<ComputerVertex> vList = new ArrayList<ComputerVertex>(vertices);
 		ComputerVertex mostForward;
-		ComputerVertex checkVertex;
 		if (vList.size() > 0)
 			mostForward = vList.get(0);
 		else
@@ -780,7 +799,7 @@ public class ComputerPlayer implements PlayerInterface {
 	}
 	//TODO replace recursive function with linkedList implementation 
 	 //from tail to head, returns head
-	public ComputerVertex endOfPath(ComputerVertex start, Direction d) {
+	private ComputerVertex endOfPath(ComputerVertex start, Direction d) {
 		//preprocessing
 		int startIndex = mainPath.indexOf(start);
 		int nextIndex = startIndex + 1;
@@ -789,7 +808,6 @@ public class ComputerPlayer implements PlayerInterface {
 		
 		boolean nextIsLink = hasNext(start, d);
 		boolean nextIsHop = hasNextHop(start, d);
-		boolean endReached = !(nextIsLink || nextIsHop);
 		if (nextIsLink) // recursive case 1
 		{
 			ComputerVertex next = mainPath.get(nextIndex);
@@ -815,7 +833,7 @@ public class ComputerPlayer implements PlayerInterface {
 			return start;
 	}
 
-	public int pathLength(ComputerVertex start, Direction d) {
+	private int pathLength(ComputerVertex start, Direction d) {
 		ComputerVertex current = start;
 		int currentIndex = mainPath.indexOf(current);
 		
@@ -848,7 +866,7 @@ public class ComputerPlayer implements PlayerInterface {
 		return length;
 	}
 
-	public Bridge findCompromisedBridge() throws NoBridgeFoundException {
+	private Bridge findCompromisedBridge() throws NoBridgeFoundException {
 		
 		boolean found = false;
 		int maxIndex = mainPath.size()-1;
@@ -897,7 +915,7 @@ public class ComputerPlayer implements PlayerInterface {
 		
 	}
 	
-	public Bridge buildBridge(ComputerVertex current, ComputerVertex next) throws NoBridgeFoundException
+	private Bridge buildBridge(ComputerVertex current, ComputerVertex next) throws NoBridgeFoundException
 	{
 		try {
 			Set<ComputerVertex> linkSet = boardGraph.getLinks(current, next);
