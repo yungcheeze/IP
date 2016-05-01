@@ -32,6 +32,8 @@ public class ComputerPlayer implements PlayerInterface {
 	private GameState gameState;
 	private ComputerBoardGraph boardGraph;
 	private LinkedList<ComputerVertex> mainPath;
+	private Map<Direction, Integer> adjacencyCount;//counts number of times adjcaent vertex in 
+	//current move direction was chosen
 	private ComputerVertex head;
 	private ComputerVertex tail;
 	private boolean movingForwards;
@@ -42,7 +44,7 @@ public class ComputerPlayer implements PlayerInterface {
 								// dependent and vice versa
 	private boolean firstMove;
 	
-	//TODO Restructure MainPath as linked list, remove forwardHop e.t.c
+
 	//when updating leading vertex, add head/tail of main path depending playing direction
 	//PathBroken(if bridge recieved)
 	//Path Check  [returns breakPoints (broken bridge)]
@@ -64,11 +66,14 @@ public class ComputerPlayer implements PlayerInterface {
 		mainPath = new LinkedList<ComputerVertex>();
 		boardGraph = new ComputerBoardGraph();
 		gameState = GameState.INCOMPLETE;
+		adjacencyCount = new HashMap<Direction, Integer>();
+		adjacencyCount.put(Direction.FORWARDS, 0);
+		adjacencyCount.put(Direction.BACKWARDS, 0);
 	}
 
 	@Override
 	public MoveInterface makeMove(Piece[][] boardView) throws NoValidMovesException {
-		// TODO Auto-generated method stub
+
 		if (!containsValidMoves(boardView) || !gameState.equals(GameState.INCOMPLETE) || colour.equals(Piece.UNSET))
 			throw new NoValidMovesException();
 		System.out.println();
@@ -321,6 +326,51 @@ public class ComputerPlayer implements PlayerInterface {
 		System.out.println();
 	}
 	
+	private void incrementAdjacencyCount()
+	{
+		int current = adjacencyCount.get(playingDirection);
+		adjacencyCount.put(playingDirection, current + 1);
+	}
+	
+	private void resetPath()
+	{
+		mainPath.clear();
+		//find new start;
+		int xlim = boardGraph.getXLim();
+		int ylim = boardGraph.getYlim();
+		//Check Middle
+		int xmid = (int) Math.floor(xlim / 2);
+		int ymid = (int) Math.floor(ylim / 2);
+		
+	}
+	
+	private ComputerVertex findGoodPositionInColumn(int x)
+	{
+		int ylim = boardGraph.getYlim();
+		for(int y = 1; y < ylim; y++)
+		{
+			Position pos = new Position(x,y);
+		}
+	}
+	
+	private boolean goodPosition(Position pos)
+	{
+		int xPos = pos.getXPos();
+		int yPos = pos.getYPos();
+		try {
+			ComputerVertex toCheck = boardGraph.getVertex(pos);
+			Set<ComputerVertex> neighbours = getFreeNeighours(toCheck);
+			if(neighbours.size() == 6)
+				return true;
+			else
+				return false;
+		} catch (InvalidPositionException e) {
+			return false;
+		} catch (EmptySetException e) {
+			return false;
+		}
+	}
+	
 	private void updateLeadingVertex(ComputerVertex leadingVertex)
 	{
 		if(playingDirection.equals(Direction.FORWARDS))
@@ -335,7 +385,7 @@ public class ComputerPlayer implements PlayerInterface {
 		}
 	}
 	
-	//TODO hasHop method
+
 	private boolean hasNextHop(ComputerVertex u, Direction d)
 	{
 		boolean toReturn = false;
@@ -434,7 +484,7 @@ public class ComputerPlayer implements PlayerInterface {
 				}
 			}
 		} catch (InvalidPositionException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 
@@ -475,7 +525,7 @@ public class ComputerPlayer implements PlayerInterface {
 				}
 			}
 		} catch (InvalidPositionException e) {
-			// TODO Auto-generated catch block
+			
 			System.out.println("invalid position exception caught by getFreeHops!");
 			e.printStackTrace();
 		}
@@ -483,7 +533,7 @@ public class ComputerPlayer implements PlayerInterface {
 		return hops;
 	}
 	
-	//TODO possible freeVertices(Set<>) method
+	
 	private Set<ComputerVertex> getFreeNeighours (ComputerVertex vertex) throws EmptySetException
 	{
 		Set<ComputerVertex> allNeighbours = boardGraph.getNeighbours(vertex);
