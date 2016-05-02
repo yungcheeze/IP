@@ -6,7 +6,9 @@ import java.util.HashSet;
 
 import game.interfaces.InvalidColourException;
 import game.interfaces.Piece;
-
+//Used by gameWon() in board
+/*Runs a DFS from a given 0 co-ordinate and sees if it can reach
+a MAX coordinate on other end of board*/
 public class PathFinder {
 	
 	private HashMap<Vertex, ArrayList<Vertex>> adjacencyList;

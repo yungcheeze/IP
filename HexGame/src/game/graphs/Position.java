@@ -1,7 +1,7 @@
 package game.graphs;
 
 import java.util.HashSet;
-
+//Used to store position info a vertex in graph representation of board
 public class Position {
 
 	private int xPos;

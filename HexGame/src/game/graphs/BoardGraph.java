@@ -7,7 +7,8 @@ import java.util.HashSet;
 import game.interfaces.InvalidColourException;
 import game.interfaces.InvalidPositionException;
 import game.interfaces.Piece;
-
+/*Graph representation of board used by board in conjunction 
+with the pathFinder to implement the gameWon method*/
 public class BoardGraph {
 	private Vertex[][] vertexBoard;
 	private HashMap<Vertex, ArrayList<Vertex>> adjacencyList;

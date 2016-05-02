@@ -8,7 +8,11 @@ import java.util.Set;
 
 import game.interfaces.InvalidPositionException;
 import game.interfaces.Piece;
-
+/*
+ * Graph representation used by ComputerPlayer
+ * Has slightly different implementation from 
+ * BoardGraph
+ */
 public class ComputerBoardGraph {
 
 	private ComputerVertex[][] vertexBoard;
@@ -150,7 +154,7 @@ public class ComputerBoardGraph {
 		}
 	}
 
-	// returns an arraylist of positions adjacent to (x,y) to place into
+	// returns an set of positions adjacent to (x,y) to place into
 	// adjacency list
 	private Set<ComputerVertex> AdjacencyGenerator(int x, int y) {
 		Set<ComputerVertex> adjacencies = new HashSet<ComputerVertex>();
@@ -183,7 +187,7 @@ public class ComputerBoardGraph {
 		return ylim;
 	}
 
-	// TODO use Position?
+	
 	public boolean isTaken(Position pos) {
 		int x = pos.getXPos();
 		int y = pos.getYPos();

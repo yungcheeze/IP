@@ -7,7 +7,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
+/*
+ * Extension of vertex used in ComputerBoardGraph
+ * has new isEND and isHome methods
+ */
 public class ComputerVertex extends Vertex {
 	
 

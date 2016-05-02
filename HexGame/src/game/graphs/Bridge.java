@@ -8,14 +8,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+//Class used to represent a bridge on the board
 public class Bridge {
 
 	private ComputerVertex leadingHop; //more advanced hop in direction of travel
 	private ComputerVertex trailingHop; //further back hop in direction of travel
 	private ComputerVertex link1;
 	private ComputerVertex link2;
-	private Map<Piece, ComputerVertex> colourMap;
+	private Map<Piece, ComputerVertex> colourMap; //Stores the colour of each link
+	//(helpful when determining state of the bridge
 
 	public Bridge() {
 		colourMap = new HashMap<Piece, ComputerVertex>();
@@ -84,6 +85,12 @@ public class Bridge {
 		colourMap.put(link1.getColour(), link1);
 		colourMap.put(link2.getColour(), link2);
 	}
+	
+	//Determines state of the bridge
+	//Compromised: can still be saved
+	//Free: both links are unoccupied
+	//Lost: both links occupied by opponent
+	//Saved: at least one link occupied by calling player
 	
 	public BridgeState getBridgeState(Piece playerColour)
 	{

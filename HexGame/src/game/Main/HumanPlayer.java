@@ -16,6 +16,7 @@ public class HumanPlayer implements PlayerInterface {
 	private Piece colour;
 	private Scanner sc;
 	private GameState gameState;
+
 	// private int xLim;
 	// private int yLim;
 
@@ -26,9 +27,11 @@ public class HumanPlayer implements PlayerInterface {
 	}
 
 	@Override
-	public MoveInterface makeMove(Piece[][] boardView) throws NoValidMovesException {
+	public MoveInterface makeMove(Piece[][] boardView)
+			throws NoValidMovesException {
 
-		if (!containsValidMoves(boardView) || !gameState.equals(GameState.INCOMPLETE))
+		if (!containsValidMoves(boardView)
+				|| !gameState.equals(GameState.INCOMPLETE))
 			throw new NoValidMovesException();
 
 		Move playerMove = new Move();
@@ -76,21 +79,23 @@ public class HumanPlayer implements PlayerInterface {
 	private void printCommandPrompt() {
 
 		System.out.println("How would you like to proceed?");
-		System.out.println(
-				"a. either enter a set of coordinates separated by a comma to make a move ('x , y' e.g. '3 , 2') ");
+		System.out
+				.println("a. either enter a set of coordinates separated by a comma to make a move ('x , y' e.g. '3 , 2') ");
 		System.out.println("b.  or type 'Q' to concede");
 		System.out.println();
 	}
 
 	private boolean confirmConcession() {
-		System.out.println("Are you sure you wish to concede? (type 'Y'for yes)");
+		System.out
+				.println("Are you sure you wish to concede? (type 'Y'for yes)");
 		System.out.println();
 		String command = sc.next();
 
 		if (command.trim().toUpperCase().equals("Y"))
 			return true;
 		else {
-			System.out.println("Unsuccesful confirmation. Restarting move Prompt.");
+			System.out
+					.println("Unsuccesful confirmation. Restarting move Prompt.");
 			return false;
 		}
 
@@ -100,7 +105,8 @@ public class HumanPlayer implements PlayerInterface {
 		String[] rawCoordinates = command.split(",");
 
 		if (rawCoordinates.length != 2) {
-			System.out.println("Invalid Command Entered. Restarting Move Prompt.");
+			System.out
+					.println("Invalid Command Entered. Restarting Move Prompt.");
 			return false;
 		}
 
@@ -108,7 +114,8 @@ public class HumanPlayer implements PlayerInterface {
 			try {
 				Integer.parseInt(entry.trim());
 			} catch (NumberFormatException e) {
-				System.out.println("Invalid Command Entered. Restarting Move Prompt.");
+				System.out
+						.println("Invalid Command Entered. Restarting Move Prompt.");
 				return false;
 			}
 
@@ -134,15 +141,18 @@ public class HumanPlayer implements PlayerInterface {
 		try {
 			playerMove.setPosition(x, y);
 		} catch (InvalidPositionException e) {
-			System.out.println("The coordinates you entered are out of range. Restarting move prompt...");
+			System.out
+					.println("The coordinates you entered are out of range. Restarting move prompt...");
 			return false;
 		}
 		return true;
 	}
+
 	// ******************************************************************************************
 
 	@Override
-	public boolean setColour(Piece colour) throws InvalidColourException, ColourAlreadySetException {
+	public boolean setColour(Piece colour) throws InvalidColourException,
+			ColourAlreadySetException {
 		boolean successful = false;
 		// if colour already set
 		if (!this.colour.equals(Piece.UNSET))
@@ -165,11 +175,13 @@ public class HumanPlayer implements PlayerInterface {
 
 		switch (state) {
 		case WON:
-			System.out.println(String.format("Player %s: you %s", colour, state));
+			System.out.println(String
+					.format("Player %s: you %s", colour, state));
 			sc.close();
 			return true;
 		case LOST:
-			System.out.println(String.format("Player %s: you %s", colour, state));
+			System.out.println(String
+					.format("Player %s: you %s", colour, state));
 			sc.close();
 			return true;
 		default:

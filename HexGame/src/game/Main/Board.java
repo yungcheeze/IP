@@ -38,9 +38,10 @@ public class Board implements BoardInterface {
 		}
 		return toReturn;
 	}
-
+	
+	// sets each entry in the board to Unset
 	private void buildBoard(int sizeX, int sizeY) {
-		// sets each entry in the board to Unset
+		
 		boardArray = new Piece[sizeX][sizeY];
 		for (int x = 0; x < boardArray.length; x++) {
 			for (int y = 0; y < boardArray[0].length; y++)
@@ -81,7 +82,6 @@ public class Board implements BoardInterface {
 	}
 
 	public Piece gameWon() throws NoBoardDefinedException {
-		// TODO
 		Piece result = Piece.UNSET;
 
 		if (boardArray == null)
@@ -99,7 +99,7 @@ public class Board implements BoardInterface {
 				result = Piece.BLUE;
 
 		} catch (InvalidColourException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 

@@ -48,18 +48,6 @@ public class ComputerPlayer implements PlayerInterface {
 	private boolean firstMove;
 	
 
-	//when updating leading vertex, add head/tail of main path depending playing direction
-	//PathBroken(if bridge recieved)
-	//Path Check  [returns breakPoints (broken bridge)]
-		//i and i+1 on linked list
-		//if i+1 is hop
-			//check linking vertices
-		//if i+1 is adjacent, link not broken
-	
-	//fixing the path
-		//check length from either side of break point, discard shorter path
-		//need an Exception check to see if its possible to get a broken path longer than a bridge i.e. no Links between break point
-
 	public ComputerPlayer() {
 		colour = Piece.UNSET;
 		playingDirection = Direction.FORWARDS;// starting direction forward
@@ -82,12 +70,16 @@ public class ComputerPlayer implements PlayerInterface {
 		System.out.println();
 		System.out.println("***" + colour + " to play***");
 		
+		//builds/updates abstraction of the board
+		/*(A graph with positions as vertices and edge between any two vertices
+		that share a border.*/
 		Move move = new Move();
 		if(firstMove)
 			boardGraph.setUpBoardGraph(boardView);
 		else
 			boardGraph.updateBoardGraph(boardView);
-		//TODO clean up and compartmentalise makeMove()
+		
+		//changes the current head of the main path
 		ComputerVertex leadingVertex = head;
 		if(playingDirection.equals(Direction.BACKWARDS))
 			leadingVertex = tail;
@@ -176,8 +168,8 @@ public class ComputerPlayer implements PlayerInterface {
 			
 			// check if hops in path compromised
 			// modified pathTraversal() if links between start and hop contain
-			// one
-			// opponent colour and other unset, then return unset;
+			// one opponent colour and other unset,
+			//  then return unset;
 			Bridge compromisedBridge;
 			try {
 				compromisedBridge = findCompromisedBridge();
@@ -191,11 +183,10 @@ public class ComputerPlayer implements PlayerInterface {
 			}  catch (NoBridgeFoundException e) {
 				// thrown from findCompromisedBridge
 				//if caught then no compromised bridge found therefore proceed to check for free hops
-//				e1.printStackTrace();
 			}
 
 			
-			// complete path, select a gap to fill (MOVE MADE)
+			// complete the path, select a gap to fill
 			if(!movingForwards && !movingBackwards)
 			{
 				Bridge freeBridge;
@@ -210,29 +201,9 @@ public class ComputerPlayer implements PlayerInterface {
 				}  catch (NoBridgeFoundException e) {
 					//thrown by findFreeBridge
 					//proceed to find random vertex
-//					e.printStackTrace();
 				}
 				 
-			}
-			// see if you can add to main path via existing vertices only add if
-			// integrity of potential path is good (has viable hops)
-			// TODO gamble method
-			// check forwards
-//			if (movingForwards) {
-//				Position position = head.getPosition();
-//				Set<ComputerVertex> headHops = getAllHops(position, Direction.FORWARDS);
-//				ComputerVertex potentialFix = null;
-//				for (ComputerVertex hop : headHops) {
-//					if (hop.getColour().equals(colour)) {
-//
-//					}
-//				}
-//			}
-
-
-			
-			
-			
+			}			
 			
 			boolean hasEndNeighbour = hasFreeEndNeighbour(leadingVertex);
 			
@@ -281,7 +252,6 @@ public class ComputerPlayer implements PlayerInterface {
 				} catch (EmptySetException e) {
 					//thrown by getfreeNeighbours
 					//if caught, then no free neighbours therefore proceed to find random free vertex
-					//				e.printStackTrace();
 				}
 			}
 			else
@@ -300,34 +270,34 @@ public class ComputerPlayer implements PlayerInterface {
 			}
 			
 			//check for random free vertex
-//			try {
-//				ComputerVertex randomFreeVertex = anyRandomPosition();
-//				Position randomPosition = randomFreeVertex.getPosition();
-//				int x = randomPosition.getXPos();
-//				int y = randomPosition.getYPos();
-//				move.setPosition(x, y);
-//				displayMoveDecision(move);
-//				
-//				return move;
-//			} catch (NoGoodVertexException e) {
-//				move.setConceded();
-//				displayMoveDecision(move);
-//				e.printStackTrace();
-//				return move;
-//			}
-//			
+			try {
+				ComputerVertex randomFreeVertex = anyRandomPosition();
+				Position randomPosition = randomFreeVertex.getPosition();
+				int x = randomPosition.getXPos();
+				int y = randomPosition.getYPos();
+				move.setPosition(x, y);
+				displayMoveDecision(move);
+				
+				return move;
+			} catch (NoGoodVertexException e) {
+				move.setConceded();
+				displayMoveDecision(move);
+				e.printStackTrace();
+				return move;
+			}
+			
 			
 			
 
 			
 		} catch (InvalidPositionException e) {
+			//failsafe in case of flawed decision routine
 			move.setConceded();
 			displayMoveDecision(move);
 			e.printStackTrace();
 			return move;
 		}
 
-		return null;
 	}
 
 	// *****************************************************************************
@@ -454,7 +424,7 @@ public class ComputerPlayer implements PlayerInterface {
 		
 		
 	}
-	
+	//gives first encountered free vertex on board 
 	private ComputerVertex anyRandomPosition() throws NoGoodVertexException
 	{
 		Set<ComputerVertex> allVertices = boardGraph.getAllVertices();
@@ -467,7 +437,8 @@ public class ComputerPlayer implements PlayerInterface {
 		
 		throw new NoGoodVertexException();
 	}
-	//TODO make iterations middle out
+	
+	//Checks column x for a vertex with all free neighbours
 	private ComputerVertex findGoodPositionInColumn(int x) throws NoGoodVertexException
 	{
 		int ylim = boardGraph.getYlim();
@@ -491,7 +462,8 @@ public class ComputerPlayer implements PlayerInterface {
 		
 		throw new NoGoodVertexException();
 	}
-	//TODO make iterations middle out
+	
+	//Checks column y for a vertex with all free neighbours
 	private ComputerVertex findGoodPositionInRow(int y) throws NoGoodVertexException
 	{
 		int xlim = boardGraph.getXLim();
@@ -513,6 +485,7 @@ public class ComputerPlayer implements PlayerInterface {
 		throw new NoGoodVertexException();
 	}
 	
+	//Checks if a particular position has all free neighbours
 	private boolean goodPosition(Position pos)
 	{
 		
@@ -530,6 +503,7 @@ public class ComputerPlayer implements PlayerInterface {
 		}
 	}
 	
+	//Updates head/tail of mainPath and pointers depending on playing direction
 	private void updateLeadingVertex(ComputerVertex leadingVertex)
 	{
 		if(playingDirection.equals(Direction.FORWARDS))
@@ -544,7 +518,7 @@ public class ComputerPlayer implements PlayerInterface {
 		}
 	}
 	
-
+	//Checks if next item on main path is a hop.
 	private boolean hasNextHop(ComputerVertex u, Direction d)
 	{
 		boolean toReturn = false;
@@ -582,7 +556,7 @@ public class ComputerPlayer implements PlayerInterface {
 		return toReturn;
 					
 	}
-	
+	//checks if next item on main path is adjacent
 	private boolean hasNext(ComputerVertex u, Direction d)
 	{
 		
@@ -602,6 +576,7 @@ public class ComputerPlayer implements PlayerInterface {
 		}else return false;
 	}
 	
+	//Checks if any neighbours of u connect to end of board
 	private boolean hasFreeEndNeighbour(ComputerVertex u)
 	{
 		Set<ComputerVertex> neighbours;
@@ -618,6 +593,8 @@ public class ComputerPlayer implements PlayerInterface {
 		return false;
 	}
 	
+	//Changes the direction in which the mainPath is built.
+	//Forwards is towards Max coordinate, Backwards is towards 0
 	private boolean changeDirection()
 	{
 		if (playingDirection.equals(Direction.FORWARDS) && movingBackwards)
@@ -634,7 +611,7 @@ public class ComputerPlayer implements PlayerInterface {
 	}
 	
 		
-
+	//Gets all hops that get the vertex closer to the Specified direction
 	private Set<ComputerVertex> getAllHops(Position position, Direction direction) throws EmptySetException {
 		Set<ComputerVertex> hops = new HashSet<ComputerVertex>();
 
@@ -663,7 +640,7 @@ public class ComputerPlayer implements PlayerInterface {
 
 		return hops;
 	}
-
+	//Same as before but only hops on which a piece can be placed are returned
 	private Set<ComputerVertex> getFreeHops(Position position, Direction direction) throws EmptySetException {
 		Set<ComputerVertex> hops = new HashSet<ComputerVertex>();
 
@@ -706,7 +683,7 @@ public class ComputerPlayer implements PlayerInterface {
 		return hops;
 	}
 	
-	
+	//Gets all adjacent vertices on which a piece can be placed
 	private Set<ComputerVertex> getFreeNeighours (ComputerVertex vertex) throws EmptySetException
 	{
 		Set<ComputerVertex> allNeighbours = boardGraph.getNeighbours(vertex);
@@ -723,7 +700,7 @@ public class ComputerPlayer implements PlayerInterface {
 		else
 			throw new EmptySetException();
 	}
-
+	//Returns the vertex that will advance the main path the farthest in playing direction
 	private ComputerVertex mostForwardVertex(Set<ComputerVertex> vertices) throws EmptySetException {
 		ArrayList<ComputerVertex> vList = new ArrayList<ComputerVertex>(vertices);
 		ComputerVertex mostForward;
@@ -753,6 +730,8 @@ public class ComputerPlayer implements PlayerInterface {
 		return mostForward;
 	}
 	
+	//Specific for adjacent vertices, makes sure returned vertex is in line with current one
+	//(Used to improve opponent blocking)
 	private ComputerVertex mostForwardAndInLineVertex(Set<ComputerVertex> vertices, ComputerVertex source) throws EmptySetException {
 		ArrayList<ComputerVertex> vList = new ArrayList<ComputerVertex>(vertices);
 		ComputerVertex mostForward;
@@ -797,8 +776,8 @@ public class ComputerPlayer implements PlayerInterface {
 	private boolean pathBroken() {
 		return !endOfPath(tail, Direction.FORWARDS).equals(head);
 	}
-	//TODO replace recursive function with linkedList implementation 
-	 //from tail to head, returns head
+
+	 //traverses main path and returns the end of it
 	private ComputerVertex endOfPath(ComputerVertex start, Direction d) {
 		//preprocessing
 		int startIndex = mainPath.indexOf(start);
@@ -832,7 +811,9 @@ public class ComputerPlayer implements PlayerInterface {
 		else
 			return start;
 	}
-
+	
+	//traverses main path from start vertex till end/break point
+	//and returns the length of traversal
 	private int pathLength(ComputerVertex start, Direction d) {
 		ComputerVertex current = start;
 		int currentIndex = mainPath.indexOf(current);
@@ -865,7 +846,7 @@ public class ComputerPlayer implements PlayerInterface {
 		}
 		return length;
 	}
-
+	//Finds a bridge on the main path that opponent is attempting to break 
 	private Bridge findCompromisedBridge() throws NoBridgeFoundException {
 		
 		boolean found = false;
@@ -891,6 +872,7 @@ public class ComputerPlayer implements PlayerInterface {
 
 	}
 	
+	//finds a bridge that has not yet been closed
 	private Bridge findFreeBridge(ComputerVertex start) throws NoBridgeFoundException
 	{
 		boolean found = false;
@@ -915,6 +897,7 @@ public class ComputerPlayer implements PlayerInterface {
 		
 	}
 	
+	//constructs a bridge object given two viable vertices
 	private Bridge buildBridge(ComputerVertex current, ComputerVertex next) throws NoBridgeFoundException
 	{
 		try {

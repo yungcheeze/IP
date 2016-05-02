@@ -1,7 +1,7 @@
 package game.graphs;
 
 import game.interfaces.Piece;
-
+//Used by BoardGraph to represent a position on the board.
 public class Vertex {
 
 	private Piece colour;

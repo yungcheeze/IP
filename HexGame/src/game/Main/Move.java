@@ -1,4 +1,5 @@
 package game.Main;
+
 import game.interfaces.InvalidPositionException;
 import game.interfaces.MoveInterface;
 
@@ -6,22 +7,19 @@ public class Move implements MoveInterface {
 	private int x;
 	private int y;
 	private boolean conceded;
-	
-	public Move()
-	{
+
+	public Move() {
 		conceded = false;
 	}
+
 	@Override
 	public boolean setPosition(int x, int y) throws InvalidPositionException {
 		boolean toReturn = false;
-		
-		if (x < 0 || y < 0)
-		{
-			//x or y being negative results in an invalid coordinate
+
+		if (x < 0 || y < 0) {
+			// x or y being negative results in an invalid coordinate
 			throw new InvalidPositionException();
-		}
-		else
-		{
+		} else {
 			this.x = x;
 			this.y = y;
 			toReturn = true;
@@ -46,7 +44,7 @@ public class Move implements MoveInterface {
 
 	@Override
 	public boolean setConceded() {
-		//TODO when would I return false
+		// TODO when would I return false
 		conceded = true;
 		return true;
 	}
