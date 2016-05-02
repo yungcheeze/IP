@@ -35,7 +35,7 @@ public class ComputerPlayer implements PlayerInterface {
 	private GameState gameState;
 	private ComputerBoardGraph boardGraph;
 	private LinkedList<ComputerVertex> mainPath;
-	private Map<Direction, Integer> adjacencyCount;//counts number of times adjcaent vertex in 
+	private Map<Direction, Integer> adjacencyCount;//counts number of times adjacent vertex in 
 	//current move direction was chosen
 	private ComputerVertex head;
 	private ComputerVertex tail;
@@ -109,7 +109,7 @@ public class ComputerPlayer implements PlayerInterface {
 					mainPath.add(leadingVertex);
 					return move; // MOVE MADE
 				} else {
-					// else try random side hop
+					// else try random "good" position
 					ComputerVertex mostForward;
 					try {
 						mostForward = findNewHead();
@@ -139,7 +139,7 @@ public class ComputerPlayer implements PlayerInterface {
 
 			// Main Sequence
 			
-			
+			//N.B
 			// hops refer to two-bridges
 			// links refer to connecting vertices in bridge
 
@@ -227,7 +227,6 @@ public class ComputerPlayer implements PlayerInterface {
 				} catch (EmptySetException e) {
 					//thrown by getfreeHops()
 					//if caught, then no free hops therefore proceed to find free adjacent vertex
-					//				e.printStackTrace();
 				}
 			}
 			else resetadjacencyCount();
